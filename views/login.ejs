@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in</title>
+    <link rel="stylesheet" href="../public/styles/log-reg.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h2>Log in account</h2>
+            <form id="loginForm">
+                <div class="auth-input">
+                    <input type="email" name="email" placeholder="Email" id="email" required>
+                    <input type="password" name="password" placeholder="Password" id="password" required>
+                <div id="warning"></div>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <a href="/" style="margin: 10px 0px">Forgot my password</a>
+            <a href="/auth/register">Create account</a>
+        </div>
+    </div>
+    <script src="../public/scripts/login.js"> </script>
+</body>
+</html>
