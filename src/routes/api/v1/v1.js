@@ -21,6 +21,8 @@ router.get('/', (req, res) => {
 const authRouter = require('./auth');
 router.use("/auth", authRouter);
 
+const printersRouter = require('./printers');
+router.use("/printers", printersRouter);
 
 
 module.exports = router;

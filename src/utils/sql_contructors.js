@@ -5,7 +5,7 @@ const { ValidationError } = require('./api_error_handler');
 const database = require('../../src/database');
 const db = database();
 
-function buildMySqlFilter(query, customSqlFilter = "") {
+function buildSearchMySqlFilter(query, customSqlFilter = "") {
     if (typeof query !== "object" || query === null) {
       throw new ValidationError("Invalid input.", "The 'query' parameter must be an object.");
     }
@@ -75,6 +75,51 @@ function buildMySqlFilter(query, customSqlFilter = "") {
     return `${whereClause} ${orderClause} ${limitClause}`.trim();
 }
 
+function buildMySqlFilter(query, filter){
+
+  let sql = [];
+  for (const [filterKey, filterItem] of Object.entries(filter)) {
+    const queryHasKey = query.hasOwnProperty(filterKey);
+    const queryValue = query[filterKey];
+
+    if (filterItem.validate_by_value === true) {
+      if (queryHasKey) {
+        // console.log(filterItem.value, queryValue);
+
+        const condition = filterItem.value === queryValue
+          ? filterItem.is_true
+          : filterItem.is_false;
+
+        if (condition) {
+          sql.push(`${filterItem.field} ${condition}`);
+        }
+      } else {
+        // Chave do filtro não está presente na query
+        if (filterItem.is_false) {
+          sql.push(`${filterItem.field} ${filterItem.is_false}`);
+        }
+      }
+    } else {
+      // validate_by_value === false
+      const condition = queryHasKey
+        ? filterItem.is_true
+        : filterItem.is_false;
+
+      if (condition) {
+        sql.push(`${filterItem.field} ${condition}`);
+      }
+    }
+  }
+
+  if(sql.length < 1){
+    sql = "";
+  }else{
+    sql = "where " + sql.join(" and ")
+  }
+
+  return sql;
+}
+
 function buildMySqlInsert(table, data) {
     let sql = `insert into ${table}(${Object.keys(data).join(", ")}) values(${Object.keys(data).map(e => { return "?" }).join(", ")})`;
 
@@ -108,4 +153,4 @@ async function checkExistence(array, by_deleted_at=true){
 }
 
   
-module.exports = { buildMySqlFilter, buildMySqlInsert, msySqlUpdateConstructor, checkExistence };
+module.exports = { buildMySqlFilter, buildSearchMySqlFilter, buildMySqlInsert, msySqlUpdateConstructor, checkExistence };

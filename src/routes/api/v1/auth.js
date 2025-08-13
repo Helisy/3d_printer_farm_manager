@@ -152,7 +152,7 @@ router.post('/login', checkSchema(postUserLoginValidation), async (req, res) => 
                 method: req.method,
                 error: false,
                 code: 201,
-                message: "Usuário criado com sucesso!",
+                message: "Login realizado com sucesso!",
                 data: [],
             }
         );

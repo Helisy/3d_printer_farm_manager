@@ -1,16 +1,17 @@
 require('dotenv').config();
 
 const { verify } = require('jsonwebtoken');
+const { apiClientError, apiServerError } = require('../utils/api_error_handler');
 
 
 //Verifies if the the acessToken in the cookies is valid.
 const validateToken = (req, res, next) => {
-    const acessToken = req.cookies.acessToken;
+    const accessToken = req.headers['accesstoken'];
 
-    if(!acessToken) return res.redirect('/auth/login');
+    if(!accessToken) return apiClientError(req, res, [], `Token inválido ou não econtrado.`, 401);
 
-    verify(acessToken, process.env.TOKEN_SECRETE, (err, user) =>{
-        if (err) return res.sendStatus(403);
+    verify(accessToken, process.env.TOKEN_SECRETE, (err, user) =>{
+        if (err) return apiClientError(req, res, [], `Token inválido ou não econtrado.`, 401);
         req.user = user;
         return next();
     });
@@ -18,15 +19,25 @@ const validateToken = (req, res, next) => {
 
 //Verifies is the user is already logged.
 const isAuthenticated = (req, res, next) => {
-    const acessToken = req.cookies.acessToken;
+    const accessToken = req.headers['accesstoken'];
 
-    if(!acessToken) return next();
+    if(!accessToken) return next();
 
-        verify(acessToken, process.env.TOKEN_SECRETE, (err, user) =>{
+        verify(accessToken, process.env.TOKEN_SECRETE, (err, user) =>{
         if (err) return res.sendStatus(403);
         req.user = user;
         res.redirect('/');
     });
 }
 
-module.exports = { validateToken, isAuthenticated };
+function checkRole(requiredRole) {
+  return (req, res, next) => {
+    if (req.user.role !== requiredRole) {
+        return apiClientError(req, res, [], `Acesso negado.`, 403);
+    }
+
+    next();
+  };
+}
+
+module.exports = { validateToken, isAuthenticated, checkRole };

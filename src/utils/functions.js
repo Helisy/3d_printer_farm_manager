@@ -52,4 +52,10 @@ function sanitizeIdentifier(identifier) {
 return identifier.replace(/[^a-zA-Z0-9_]/g, "");
 }
 
-module.exports = { isValidDateFormat, countCharOccurrences, validateObject, consoleLog, removeDuplicates, sanitizeIdentifier };
+function areAllItemsInArray(A, B) {
+  // Check if all items in B are in A
+  return B.every(item => A.includes(item));
+}
+
+
+module.exports = { isValidDateFormat, countCharOccurrences, validateObject, consoleLog, removeDuplicates, sanitizeIdentifier, areAllItemsInArray };
