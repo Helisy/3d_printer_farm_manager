@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
+    <script src="/public/scripts/http_helper.js"></script>
+    <script src="/public/scripts/get_user.js"></script>
+    <script src="/public/scripts/notifications.js" defer></script>
+    <script src="/public/scripts/inputs.js" defer></script>
+    <script src="/public/scripts/tab_switch.js" defer></script>
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/side_tab.css">
+    <link rel="stylesheet" href="/public/styles/buttons.css">
+    <link rel="stylesheet" href="/public/styles/structure_cards.css">
+    <link rel="stylesheet" href="/public/styles/grid_table.css">
+    <link rel="stylesheet" href="/public/styles/info_card.css">
+    <link rel="stylesheet" href="/public/styles/inputs.css">
+    <link rel="stylesheet" href="/public/styles/select.css">
+
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div>
+            <i class="fa-solid fa-check"></i>
+            <div>
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="hover-container">        
+        <div class="ifc-loading" id="loading_spinner">
+            <div class="lds-dual-ring"></div>
+            <label for="">Aguarde...</label>
+        </div>
+        <div class="info-card w35" id="ifc_create_product">
+            <div class="ifc-header">
+                <h3>Criar Produto</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <select class="select" id="sl_models_brand"></select>
+                <select class="select" id="sl_brand"></select>
+                <select class="select" id="sl_material"></select>
+                <div class="inpt">
+                    <span>SKU</span>
+                    <input type="text" id="inpt_sku">
+                </div>
+                <div class="inpt">
+                    <span>Itens Inclusos</span>
+                    <input type="text" id="inpt_itens">
+                </div>
+                <div class="inpt">
+                    <span>Tempo de Impressão (HH:MM)</span>
+                    <input type="time" id="inpt_time">
+                </div>
+                <div class="flex">
+                    <div class="inpt">
+                        <span>Peso Bruto</span>
+                        <input type="Number" id="inpt_w_gross">
+                    </div>
+                    <div class="inpt">
+                        <span>Peso Liquido</span>
+                        <input type="Number" id="inpt_w_net">
+                    </div>
+                </div>
+                <div class="inpt">
+                    <span>Quantidade de Itens</span>
+                    <input type="Number" id="inpt_quantity">
+                </div>
+                <div class="flex align-center space-between">
+                    <h3>Gcode</h3>
+                    <input type="file" id="inpt_file">
+                </div>
+                <div class="flex align-center space-between">
+                    <h3>Imagem</h3>
+                    <input type="file" id="inpt_img">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="createProduct()">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="side-nav close" id="side_nav">
+            <div class="option close switch" id="tab_sw" href="">
+                <i class="fa-solid fa-bars"></i>
+                <span>3D System</span>
+            </div>
+            <!-- <a class="option close" href="/jobs" id="jobs">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Pedidos</span>
+            </a>
+            <a class="option close" href="">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Separação</span>
+            </a> -->
+            <a class="option close" href="/printers" id="printers">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>Impressoras</span>
+            </a>
+            <a class="option close" href="/products" id="products">
+                <i class="fa-solid fa-cube"></i>
+                <span>Produtos</span>
+            </a>
+            <a class="option close" href="/tickets" id="tickets">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Manutenção</span>
+            </a>
+            <a class="option close" href="/users" id="users">
+                <i class="fa-solid fa-users"></i>
+                <span>Usuários</span>
+            </a>
+            <a class="option close" href="/config" id="config">
+                <i class="fa-solid fa-gear"></i>
+                <span>Configurações</span>
+            </a>
+        </div>
+        <div class="container">
+            <div class="content flex col" id="title">
+                <div class="struct-card row align-center space-between">
+                    <div class="flex align-center gap-1">
+                        <i class="fa-solid fa-user ct-user" id="user_icon"></i>    
+                        <h3 id="user_name"></h3>
+                    </div>
+                    <div>
+                        <button class="btn basic" onclick="logout()">Sair</button>
+                    </div>
+                </div>
+                <div class="struct-card row align-center" id="products_search">
+                    <button class="btn primary" onclick="toggleHoverContainer('ifc_create_product')"><i class="fa-solid fa-plus"></i>Produto</button>
+                    <div class="inpt">
+                        <input placeholder="Pesquisar..." id="inpt_search" type="text">
+                        <button class="action-btn btn primary" id="btn_search"><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="content grid c4" id="products_container">
+                <!-- <div class="struct-card col space-between">
+                    <div class="flex space-between">
+                        <h2>TD0045</h2>
+                        <span style="font-size: 1.2rem;">1un</span>
+                    </div>
+                    <span class="lb-title">
+                        <span class="primary_darker">Detalhes</span>
+                    </span>
+                    <div>
+                        <p class="flex space-between" id="filament_info"><b>Peso Bruto:</b>75g</p>
+                        <p class="flex space-between" id="filament_info"><b>Peso Liquido:</b>55g</p>
+                        <p class="flex space-between" id="filament_info"><b>Tempo Impressão:</b>15m 5s</p>
+                    </div>
+                    <span class="lb-title">
+                        <span class="primary_darker">Impressão</span>
+                    </span>
+                    <div>
+                        <p class="flex space-between" id="filament_info"><b>Impressora:</b>Creality</p>
+                        <p class="flex space-between" id="filament_info"><b>Filamento Marca:</b>Voolt</p>
+                        <p class="flex space-between" id="filament_info"><b>Filamento Material:</b>PLA</p>
+                    </div>
+                    <span class="lb-title">
+                    </span>
+                    <i class="fa-solid fa-trash" style="color: var(--primary_darker); cursor: pointer; font-size: 1.3rem;"></i>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <script>
+    function setUser(){
+        const user = JSON.parse(localStorage.getItem("user"));
+        const user_name = document.querySelector("#user_name");
+
+        user_name.innerHTML = user.firstName;
+        const viewportWidth = window.innerWidth;
+
+        document.querySelector("#user_icon").classList.value = user.role == "admin" ? "fa-solid fa-crown ct-user" : "fa-solid fa-user ct-user";
+        
+        if(viewportWidth < 600){
+            user_name.style.fontSize = "1rem";
+        }
+    }
+    setUser();
+
+    function updateScreenSize() {
+        const viewportWidth = window.innerWidth;
+        const products_search = document.querySelector("#products_search");
+        const products_container = document.querySelector("#products_container");
+
+        const isMobile = viewportWidth < 600;
+
+        products_search.classList.toggle("col", isMobile);
+        products_search.classList.toggle("row", !isMobile);
+
+        products_container.classList.toggle("c1", isMobile);
+        products_container.classList.toggle("c4", !isMobile);
+    }
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+
+    
+
+
+
+
+    const hover_elements = 
+    {
+        loading_spinner: document.querySelector("#loading_spinner"),
+        ifc_create_product: document.querySelector("#ifc_create_product")
+    }
+
+    const hover_container = document.querySelector(".hover-container");
+    hover_container.style.display = "none";
+
+    function toggleHoverContainer(el_id){
+        if(hover_container.style.display == "none"){
+            hover_container.style.display = "flex";
+
+            for (const [key, value] of Object.entries(hover_elements)) {
+            
+                if(key == el_id){
+                    value.style.display = "flex";
+                    continue;
+                }
+
+                value.style.display = "none";
+            }
+            
+        }else{
+            hover_container.style.display = "none";
+        }
+    }
+
+    const products_container = document.querySelector("#products_container");
+
+    const btn_search = document.querySelector("#btn_search");
+    const inpt_search = document.querySelector("#inpt_search");
+
+    const sl_models_brand = document.querySelector("#sl_models_brand");
+    const sl_brand = document.querySelector("#sl_brand");
+    const sl_material = document.querySelector("#sl_material");
+    const inpt_sku = document.querySelector("#inpt_sku");
+    const inpt_itens = document.querySelector("#inpt_itens");
+    const inpt_time = document.querySelector("#inpt_time");
+    const inpt_w_gross = document.querySelector("#inpt_w_gross");
+    const inpt_w_net = document.querySelector("#inpt_w_net");
+    const inpt_quantity = document.querySelector("#inpt_quantity");
+    const inpt_file = document.querySelector("#inpt_file");
+    const inpt_img = document.querySelector("#inpt_img");
+
+    async function main() {
+        toggleHoverContainer("loading_spinner");
+
+        await showProducts();
+
+        toggleHoverContainer();
+
+        let material_data = await fetchInfo(`/api/v1/printers/filaments/materials`);
+        material_data = material_data.data;
+
+        let brand_data = await fetchInfo(`/api/v1/printers/filaments/brands`);
+        brand_data = brand_data.data;
+
+        let printer_brand_data = await fetchInfo(`/api/v1/printers/models`);
+        printer_brand_data = printer_brand_data.data;
+
+        let material_html = "";
+        let brand_html = "";
+        let printer_brand= "";
+
+        material_data.forEach(e => { material_html += `<option value="${e.id}">${e.label}</option>`; });
+        brand_data.forEach(e => { brand_html += `<option value="${e.id}">${e.label}</option>`; });
+        printer_brand_data.forEach(e => { printer_brand += `<option value="${e.id}">${e.printer_brand_name} - ${e.label}</option>`; });
+       
+      
+        sl_models_brand.innerHTML = printer_brand;
+        sl_brand.innerHTML = brand_html;
+        sl_material.innerHTML = material_html;
+    }
+
+    main();
+
+    async function showProducts(query){
+        let products = await fetchInfo(`/api/v1/products${!query ? "" : "?q=" + query}`);
+        products = products.data;
+
+        let html = "";
+
+        for (const product of products) {
+            html += 
+            `
+                <div class="struct-card col">
+                    <div class="flex space-between">
+                        <h2>${product.sku}</h2>
+                        <span style="font-size: 1.2rem;">${product.quantity}un</span>
+                    </div>
+                    <div class="square-img ">
+                        <img src="public/product_images/${product.image_path}" alt="${product.image_path}">
+                    </div>
+                    <div>
+                        <p class="flex space-between" id="filament_info"><b>Peso Bruto:</b>${product.weight_gross}g</p>
+                        <p class="flex space-between" id="filament_info"><b>Peso Liquido:</b>${product.weight_net}g</p>
+                        <p class="flex space-between" id="filament_info"><b>Tempo Impressão:</b>${formatTime(product.print_time)}</p>
+                    </div>
+                    <div>
+                        <p class="flex space-between" id="filament_info"><b>Para Modelo:</b>${product.printer_brand_name} - ${product.printer_model_name}</p>
+                        <p class="flex space-between" id="filament_info"><b>Filamento Marca:</b>${product.filament_brand_name}</p>
+                        <p class="flex space-between" id="filament_info"><b>Filamento Material:</b>${product.material_name}</p>
+                    </div>
+                    <span class="lb-title" style="color: var(--primary_darker)">Intens Inclusos</span>
+                    <p>${product.included_items}</p>
+                    <i class="fa-solid fa-trash" style="color: var(--primary_darker); cursor: pointer; font-size: 1.3rem;" onclick="deleteProduct(${product.id})"></i>
+                </div>
+            `;
+        }
+
+        products_container.innerHTML = html;
+    }
+
+    async function createProduct() {
+
+        if(inpt_sku.value < 1){
+            return pushNotify("error", "Preencha todos os campos!");
+        }
+        
+        // if(inpt_itens.value < 1){
+        //     return pushNotify("error", "Preencha todos os campos!");
+        // }
+
+        if(inpt_time.value < 1){
+            return pushNotify("error", "Preencha todos os campos!");
+        }
+
+        if(inpt_w_gross.value < 1){
+            return pushNotify("error", "Preencha todos os campos!");
+        }
+
+        if(inpt_w_net.value < 1){
+            return pushNotify("error", "Preencha todos os campos!");
+        }
+
+        if(inpt_quantity.value < 1){
+            return pushNotify("error", "Preencha todos os campos!");
+        }
+
+        if(inpt_file.value < 1){
+            return pushNotify("error", "Preencha todos os campos!");
+        }
+        
+        if(inpt_file.files > 1){
+            return pushNotify("error", "Selecione somente um arquivo!");
+        }
+
+        if(!inpt_file.files[0]?.name.includes(".gcode")){
+            return pushNotify("error", "Selecione um gcode.");
+        }
+
+        if(inpt_img.files > 1){
+            return pushNotify("error", "Selecione somente um arquivo!");
+        }
+        
+        const fileName = inpt_img.files[0]?.name.toLowerCase();
+
+        if (!fileName || !fileName.match(/\.(png|jpg|jpeg)$/)) {
+            return pushNotify("error", "Selecione uma imagem.");
+        }
+
+        let response_1 = await postData(`/api/v1/products`, "post", {
+            printer_model_id: sl_models_brand.value,
+            filament_brand_id: sl_brand.value,
+            filament_material_id: sl_material.value,
+            sku: inpt_sku.value,
+            included_items: inpt_itens.value,
+            print_time: inpt_time.value,
+            weight_gross: inpt_w_gross.value,
+            weight_net: inpt_w_net.value,
+            quantity: inpt_quantity.value
+        });
+
+        switch (response_1.code) {
+            case 400:
+                pushNotify("error", response_1.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+        
+        const file = inpt_file.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const response = await fetch(`/api/v1/products/${response_1.data.id}/gcode`, {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                return pushNotify(`Erro ao enviar: ${response.status}`);
+            }
+
+            // const resultado = await response.json();
+        } catch (erro) {
+            return pushNotify("error", "Erro ao enviar o arquivo!");
+        }
+
+        console.log(inpt_img.files[0])
+
+        const img_file = inpt_img.files[0];
+        const formData_2 = new FormData();
+        formData_2.append("file", img_file);  
+
+        try {
+            const response = await fetch(`/api/v1/products/${response_1.data.id}/image`, {
+                method: "POST",
+                body: formData_2
+            });
+
+            if (!response.ok) {
+                return pushNotify(`Erro ao enviar: ${response.status}`);
+            }
+
+            // const resultado = await response.json();
+        } catch (erro) {
+            return pushNotify("error", "Erro ao enviar o arquivo!");
+        }
+
+        await showProducts(inpt_sku.value);
+
+        inpt_sku.value = "";
+        inpt_itens.value = "";
+        inpt_time.value = "";
+        inpt_w_gross.value = "";
+        inpt_w_net.value = "";
+        inpt_quantity.value = "";
+
+        toggleHoverContainer();
+    }
+    
+    btn_search.addEventListener("click", async e => {
+        // if(inpt_search.value == "") return;
+
+        toggleHoverContainer();
+
+        await showProducts(inpt_search.value)
+
+        toggleHoverContainer();
+    });
+
+    inpt_search.addEventListener("keydown", async e => {
+        // if(inpt_search.value == "") return;
+
+        toggleHoverContainer();
+
+        await showProducts(inpt_search.value)
+
+        toggleHoverContainer();
+    });
+    
+    async function deleteProduct(id) {
+        if(!confirm("Tem certeza que deseja deletar?")) return
+
+        let response = await fetchInfo(`/api/v1/products/${id}`, "delete");
+
+        switch (response.code) {
+            case 200:
+                await main();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 403:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error")
+                return;
+        }
+    }
+
+    function formatTime(time) {
+        const [hours, minutes, seconds] = time.split(':').map(Number);
+
+        const parts = [];
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        if (seconds > 0) parts.push(`${seconds}s`);
+
+        return parts.join(' ') || '0s';
+    }
+
+    </script>
+</body>
+</html>

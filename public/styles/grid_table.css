@@ -1,0 +1,102 @@
+
+.tb-body
+{
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tb-header
+{
+    display: grid;
+    grid-template-columns: 50% 50%;
+    /* padding: .5rem; */
+    margin-bottom: .5rem;
+    font-weight: 600;
+    justify-items: start;
+    white-space: nowrap;
+        grid-auto-flow: column; /* Força os elementos a fluírem em linha */
+    grid-auto-columns: max-content; /* Faz com que as colunas tenham largura mínima necessária */
+}
+
+.tb-line
+{
+    display: grid;
+    grid-template-columns: 50% 50%;
+    padding: .5rem;
+    background-color: rgba(120, 211, 120, 0.1);
+    margin-bottom: .5rem;
+    border-radius: .5rem;
+    justify-items: start;
+    white-space: nowrap;
+        grid-auto-flow: column; /* Força os elementos a fluírem em linha */
+    grid-auto-columns: max-content; /* Faz com que as colunas tenham largura mínima necessária */
+}
+
+.tc-3
+{
+    grid-template-columns: repeat(3, calc(100% / 3));
+}
+
+.tc-4
+{
+    grid-template-columns: repeat(4, calc(100% / 4));
+}
+
+.tb-line:last-child
+{
+    margin-bottom: 0;
+}
+
+.tb-line > span > i
+{
+   padding-right: .5rem;
+   color: var(--primary_darker);
+   cursor: pointer;
+}
+
+.tb-empty
+{
+    padding: 1rem;
+    text-align: center;
+    font-size: .9rem;
+}
+
+
+
+
+
+.tb-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.tb-table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+    font-family: sans-serif;
+    white-space: nowrap;
+}
+
+.tb-table thead th {
+    font-weight: 600;
+    text-align: left;
+    padding: 0.5rem;
+}
+
+.tb-table tbody tr {
+    background-color: rgba(120, 211, 120, 0.1);
+    border-radius: 0.5rem;
+}
+
+.tb-table td {
+    padding: 0.5rem;
+    vertical-align: middle;
+}
+
+.flex.align-center {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

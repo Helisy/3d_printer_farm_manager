@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
+    <script src="/public/scripts/http_helper.js"></script>
+    <script src="/public/scripts/get_user.js"></script>
+    <script src="/public/scripts/notifications.js" defer></script>
+    <script src="/public/scripts/inputs.js" defer></script>
+    <script src="/public/scripts/tab_switch.js" defer></script>
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/side_tab.css">
+    <link rel="stylesheet" href="/public/styles/buttons.css">
+    <link rel="stylesheet" href="/public/styles/structure_cards.css">
+    <link rel="stylesheet" href="/public/styles/grid_table.css">
+    <link rel="stylesheet" href="/public/styles/info_card.css">
+    <link rel="stylesheet" href="/public/styles/inputs.css">
+    <link rel="stylesheet" href="/public/styles/select.css">
+
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div>
+            <i class="fa-solid fa-check"></i>
+            <div>
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="hover-container">        
+        <div class="ifc-loading 3" id="loading_spinner">
+            <div class="lds-dual-ring"></div>
+            <label for="">Aguarde...</label>
+        </div>
+        <div class="info-card w35" id="ifc_edit_user">
+            <div class="ifc-header">
+                <h3 id="user_ifc_title">Editar usuário</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <p>Prencha apenas o campo do valor que deseja alterar</p>
+                <div class="inpt">
+                    <span>Nome</span>
+                    <input type="text" id="inpt_name">
+                </div>
+                <div class="inpt">
+                    <span>Sobrenome</span>
+                    <input type="text" id="inpt_last_name">
+                </div>
+                <select class="select" id="sel_role">
+                    <option value="">Nivel de Acesso</option>
+                    <option value="admin">Admin</option>
+                    <option value="basic">Basic</option>
+                </select>
+                <div class="inpt">
+                    <span>Username</span>
+                    <input type="text" id="inpt_username">
+                </div>
+                <div class="inpt">
+                    <span>Senha</span>
+                    <input type="password" id="inpt_password">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="editUser()">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="side-nav close" id="side_nav">
+            <div class="option close switch" id="tab_sw" href="">
+                <i class="fa-solid fa-bars"></i>
+                <span>3D System</span>
+            </div>
+            <!-- <a class="option close" href="/jobs" id="jobs">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Pedidos</span>
+            </a>
+            <a class="option close" href="">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Separação</span>
+            </a> -->
+            <a class="option close" href="/printers" id="printers">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>Impressoras</span>
+            </a>
+            <a class="option close" href="/products" id="products">
+                <i class="fa-solid fa-cube"></i>
+                <span>Produtos</span>
+            </a>
+            <a class="option close" href="/tickets" id="tickets">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Manutenção</span>
+            </a>
+            <a class="option close" href="/users" id="users">
+                <i class="fa-solid fa-users"></i>
+                <span>Usuários</span>
+            </a>
+            <a class="option close" href="/config" id="config">
+                <i class="fa-solid fa-gear"></i>
+                <span>Configurações</span>
+            </a>
+        </div>
+        <div class="container">
+            <div class="content flex col" id="title">
+                <div class="struct-card row align-center space-between">
+                    <div class="flex align-center gap-1">
+                        <i class="fa-solid fa-user ct-user" id="user_icon"></i>    
+                        <h3 id="user_name"></h3>
+                    </div>
+                    <div>
+                        <button class="btn basic" onclick="logout()">Sair</button>
+                    </div>
+                </div>
+                <div class="struct-card row align-center" id="sw_title">
+                    <button class="btn tab-switch basic" onclick="switchTabs(this)" data-show="true" data-tab-id="1">Usuários</button>
+                    <button class="btn tab-switch basic" onclick="switchTabs(this)" data-show="false" data-tab-id="2">Registrar</button>
+                </div>
+            </div>
+            <div class="content tab flex align-start" data-tab-id="1" data-display="">
+                <div class="struct-card">
+                    <div class="tb-container">
+                        <table class="tb-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Usuário</th>
+                                    <th>Nv. Acesso</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users_table">
+                                <!-- <tr>
+                                    <td>Gabriela Elise Dias Da Silva</td>
+                                    <td>helisy</td>
+                                    <td>Admin</td>
+                                    <th width="1">
+                                        <i class="fa-solid fa-pen" style="padding: .5rem; color: var(--danger_darker); background-color: var(--danger_light); border-radius: .5rem; cursor: pointer;"></i>
+                                        <i class="fa-solid fa-trash" style="padding: .5rem; color: var(--warning_darker); background-color: var(--warning_light); border-radius: .5rem; cursor: pointer;"></i>
+                                    </th>
+                                </tr> -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="content tab flex align-start" data-tab-id="2" data-display="">
+                <div class="struct-card w35" id="ct_1">
+                    <div class="inpt">
+                        <span>Nome</span>
+                        <input type="text" id="cr_inpt_name">
+                    </div>
+                    <div class="inpt">
+                        <span>Sobrenome</span>
+                        <input type="text" id="cr_inpt_last_name">
+                    </div>
+                    <div class="inpt">
+                        <span>Username</span>
+                        <input type="text" id="cr_inpt_username">
+                    </div>
+                    <div class="inpt">
+                        <span>Senha</span>
+                        <input type="password" id="cr_inpt_password">
+                    </div>
+                    <div class="flex col align-end">
+                        <div class="btn primary" onclick="createUser()">Criar Usuário</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    function setUser(){
+        const user = JSON.parse(localStorage.getItem("user"));
+        const user_name = document.querySelector("#user_name");
+        const user_icon = document.querySelector("#user_icon");
+
+        user_name.innerHTML = user.firstName;
+        const viewportWidth = window.innerWidth;
+
+        document.querySelector("#user_icon").classList.value = user.role == "admin" ? "fa-solid fa-crown ct-user" : "fa-solid fa-user ct-user";
+        
+        if(viewportWidth < 600){
+            user_name.style.fontSize = "1rem";
+        }
+    }
+    setUser();
+
+    function updateScreenSize() {
+        const viewportWidth = window.innerWidth;
+        const ct_1 = document.querySelector("#ct_1");
+
+        const isMobile = viewportWidth < 600;
+
+        ct_1.classList.toggle("w35", !isMobile);
+
+    }
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+
+    async function switchTabs(e)
+    {
+        if(e.dataset.show === "true") return;
+
+        if(!!e.dataset.function){
+            await tabFunction[e.dataset.function]()
+        }
+
+        e.classList.add("selected")
+        e.dataset.show = "true"
+        e.scrollIntoView();
+
+        document.querySelectorAll(".btn.tab-switch").forEach(el => {
+            if(el.dataset.tabId != e.dataset.tabId ){
+                el.classList.remove("selected")
+                el.dataset.show = "false"
+            }
+        })
+
+        document.querySelectorAll(".content.tab").forEach(el => {
+            if(el.dataset.tabId != e.dataset.tabId ){
+                el.style.display = "none"
+            }else{
+                console.log()
+                el.style.display = el.dataset.display;
+            }
+        })
+    }
+
+    function defineTabs(){
+        let tab_id;
+
+        document.querySelectorAll(".btn.tab-switch").forEach(el => {
+            if(el.dataset.show === "true" ){
+                el.classList.add("selected")
+                tab_id = el.dataset.tabId;
+            }else{
+                el.classList.remove("selected")
+                el.dataset.show = "false"
+            }
+        })
+
+        document.querySelectorAll(".content.tab").forEach(el => {
+            if(el.dataset.tabId != tab_id ){
+                el.style.display = "none"
+            }else{
+                el.style.display = el.dataset.display;
+            }
+        })
+    }
+
+    defineTabs()
+
+    const hover_elements = 
+    {
+        loading_spinner: document.querySelector("#loading_spinner"),
+    }
+
+    const hover_container = document.querySelector(".hover-container");
+    hover_container.style.display = "none";
+
+    function toggleHoverContainer(el_id){
+        if(hover_container.style.display == "none"){
+            hover_container.style.display = "flex";
+
+            for (const [key, value] of Object.entries(hover_elements)) {
+            
+                if(key == el_id){
+                    value.style.display = "flex";
+                    continue;
+                }
+
+                value.style.display = "none";
+            }
+            
+        }else{
+            hover_container.style.display = "none";
+        }
+    }
+
+    const users_table = document.querySelector("#users_table");
+    const user_ifc_title = document.querySelector("#user_ifc_title");
+
+    const inpt_name = document.querySelector("#inpt_name");
+    const inpt_last_name = document.querySelector("#inpt_last_name");
+    const sel_role = document.querySelector("#sel_role");
+    const inpt_username = document.querySelector("#inpt_username");
+    const inpt_password = document.querySelector("#inpt_password");
+
+    const cr_inpt_name = document.querySelector("#cr_inpt_name");
+    const cr_inpt_last_name = document.querySelector("#cr_inpt_last_name");
+    const cr_inpt_username = document.querySelector("#cr_inpt_username");
+    const cr_inpt_password = document.querySelector("#cr_inpt_password");
+
+    async function main(params) {
+        showUsers();
+    }
+
+    main();
+
+    async function showUsers() {
+        let users_data = await fetchInfo(`/api/v1/users`);
+        users_data = users_data.data;
+
+        let table_html = "";
+
+        for (const data of users_data) {
+            table_html += 
+            `
+            <tr>
+                <td>${data.first_name} ${data.last_name}</td>
+                <td>${data.username}</td>
+                <td>${data.role}</td>
+                <th width="1">
+                    <i class="fa-solid fa-pen" onclick="loadIFCUser(${data.id})" style="padding: .5rem; color: var(--danger_darker); background-color: var(--danger_light); border-radius: .5rem; cursor: pointer;"></i>
+                    <i class="fa-solid fa-trash" onclick="deleteUsers(${data.id})" style="padding: .5rem; color: var(--warning_darker); background-color: var(--warning_light); border-radius: .5rem; cursor: pointer;"></i>
+                </th>
+            </tr>
+            `;
+        }
+
+        users_table.innerHTML = table_html;
+    }
+
+    async function loadIFCUser(id){
+        user_ifc_title.dataset.user_id = id;
+        toggleHoverContainer('ifc_edit_user');
+    }
+
+    const regex_real_name = /^[\p{L} ]+$/u;
+    const regex_user_name = /^[a-z-_]+$/;
+
+    async function editUser() {
+        let values = {
+            first_name: inpt_name.value,
+            last_name: inpt_last_name.value,
+            role: sel_role.value,
+            username: inpt_username.value,
+            password: inpt_password.value,
+        };
+
+        for (const [key, originalValue] of Object.entries(values)) {
+            let value = originalValue;
+
+            if (value === "") {
+                delete values[key];
+                continue;
+            }
+
+            switch (key) {
+                case "first_name":
+                case "last_name":
+                    if (!regex_real_name.test(value)) {
+                        pushNotify("error", "Nome e Sobrenome não devem conter caracteres especiais ou números!");
+                        return;
+                    }
+                    value = UpperWords(value);
+                    break;
+
+                case "username":
+                    if (!regex_user_name.test(value)) {
+                        pushNotify("error", "Usuário não deve conter caracteres especiais, exceto '_'.");
+                        return;
+                    }
+                    break;
+            }
+
+            values[key] = value;
+        }
+        
+
+        if(Object.entries(values).length < 1){
+            return pushNotify("error", "Insira ao menos um valor para alterar.");
+        }
+
+        let response = await postData(`/api/v1/users/${user_ifc_title.dataset.user_id}`, "put", values);
+
+        switch (response.code) {
+            case 200:
+                inpt_name.value = "";
+                inpt_last_name.value = "";
+                sel_role.selectedIndex = 0;
+                inpt_username.value = "";
+                inpt_password.value = "";
+                await main();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+       async function createUser() {
+        let values = {
+            first_name: cr_inpt_name.value,
+            last_name: cr_inpt_last_name.value,
+            username: cr_inpt_username.value,
+            password: cr_inpt_password.value,
+        };
+
+        for (const [key, originalValue] of Object.entries(values)) {
+            let value = originalValue;
+
+            if (value === "") {
+                delete values[key];
+                continue;
+            }
+
+            switch (key) {
+                case "first_name":
+                case "last_name":
+                    if (!regex_real_name.test(value)) {
+                        pushNotify("error", "Nome e Sobrenome não devem conter caracteres especiais ou números!");
+                        return;
+                    }
+                    value = UpperWords(value);
+                    break;
+
+                case "username":
+                    if (!regex_user_name.test(value)) {
+                        pushNotify("error", "Usuário não deve conter caracteres especiais, exceto '_'.");
+                        return;
+                    }
+                    break;
+            }
+
+            values[key] = value;
+        }
+        
+        if(Object.entries(values).length < 1){
+            return pushNotify("error", "Insira ao menos um valor para alterar.");
+        }
+
+        let response = await postData(`/api/v1/auth/register`, "post", values);
+
+        switch (response.code) {
+            case 201:
+                window.location.reload();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+    async function deleteUsers(id) {
+        if(!confirm("Tem certeza que deseja deletar?")) return
+
+        let response = await fetchInfo(`/api/v1/users/${id}`, "delete");
+
+        switch (response.code) {
+            case 200:
+                window.location.reload();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 403:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error")
+                return;
+        }
+    }
+
+    function UpperWords(text) {
+        return text
+            .toLowerCase()
+            .split(' ')
+            .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1))
+            .join(' ');
+    }
+
+    </script>
+</body>
+</html>

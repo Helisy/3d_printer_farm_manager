@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
+    <script src="/public/scripts/http_helper.js"></script>
+    <script src="/public/scripts/get_user.js"></script>
+    <script src="/public/scripts/notifications.js" defer></script>
+    <script src="/public/scripts/inputs.js" defer></script>
+    <script src="/public/scripts/tab_switch.js" defer></script>
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/side_tab.css">
+    <link rel="stylesheet" href="/public/styles/buttons.css">
+    <link rel="stylesheet" href="/public/styles/structure_cards.css">
+    <link rel="stylesheet" href="/public/styles/grid_table.css">
+    <link rel="stylesheet" href="/public/styles/info_card.css">
+    <link rel="stylesheet" href="/public/styles/inputs.css">
+    <link rel="stylesheet" href="/public/styles/select.css">
+
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div>
+            <i class="fa-solid fa-check"></i>
+            <div>
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="container flex col align-center jt-center pd-1">
+            <div class="struct-card w35" id="log_card">
+                <div class="flex col align-center w100" style="margin: 2rem 0;">
+                    <img src="/public/images/logo_green.png" style="width: 50%; border-radius: 0;">
+                </div>
+                <div class="inpt">
+                    <span>Usuário</span>
+                    <input type="text" id="inpt_user">
+                </div>
+                <div class="inpt">
+                    <span>Senha</span>
+                    <input type="password" id="inpt_password">
+                </div>
+                <div class="flex col align-end">
+                    <div class="btn primary" onclick="login()">Entrar</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        
+    function updateScreenSize() {
+        const viewportWidth = window.innerWidth;
+        const log_card = document.querySelector("#log_card");
+
+        const isMobile = viewportWidth < 600;
+
+        log_card.classList.toggle("w35", !isMobile);
+    }
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+
+    const inpt_user = document.querySelector("#inpt_user")
+    const inpt_password = document.querySelector("#inpt_password")
+
+    async function login() {
+        if(inpt_user.value.length < 1){
+            return pushNotify("error", "Insira um valor!");
+        }
+
+        if(inpt_password.value.length < 1){
+            return pushNotify("error", "Insira um valor!");
+        }
+
+        let response = await postData(`/api/v1/auth/login`, "post", {
+            username: inpt_user.value,
+            password: inpt_password.value
+        });
+
+        switch (response.code) {
+            case 201:
+                await getUser();
+                window.location.replace("/printers");
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+    
+    inpt_user.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        login()
+      }
+    });
+
+    inpt_password.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        login()
+      }
+    });
+    
+    </script>
+</body>
+</html>

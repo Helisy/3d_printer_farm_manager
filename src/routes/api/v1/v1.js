@@ -24,5 +24,17 @@ router.use("/auth", authRouter);
 const printersRouter = require('./printers');
 router.use("/printers", printersRouter);
 
+const usersRouter = require('./users');
+router.use("/users", usersRouter);
+
+const jobsRouter = require('./jobs');
+router.use("/jobs", jobsRouter);
+
+const productsRouter = require('./products');
+router.use("/products", productsRouter);
+
+const ticketsRouter = require('./tickets');
+router.use("/tickets", ticketsRouter);
+
 
 module.exports = router;

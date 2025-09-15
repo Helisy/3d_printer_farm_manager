@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
+    <script src="/public/scripts/http_helper.js"></script>
+    <script src="/public/scripts/get_user.js"></script>
+    <script src="/public/scripts/notifications.js" defer></script>
+    <script src="/public/scripts/inputs.js" defer></script>
+    <script src="/public/scripts/tab_switch.js" defer></script>
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/side_tab.css">
+    <link rel="stylesheet" href="/public/styles/buttons.css">
+    <link rel="stylesheet" href="/public/styles/structure_cards.css">
+    <link rel="stylesheet" href="/public/styles/grid_table.css">
+    <link rel="stylesheet" href="/public/styles/info_card.css">
+    <link rel="stylesheet" href="/public/styles/inputs.css">
+    <link rel="stylesheet" href="/public/styles/select.css">
+
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div>
+            <i class="fa-solid fa-check"></i>
+            <div>
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="hover-container">        
+        <div class="ifc-loading" id="loading_spinner">
+            <div class="lds-dual-ring"></div>
+            <label for="">Aguarde...</label>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="side-nav close" id="side_nav">
+            <div class="option close switch" id="tab_sw" href="">
+                <i class="fa-solid fa-bars"></i>
+                <span>3D System</span>
+            </div>
+            <!-- <a class="option close" href="/jobs" id="jobs">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Pedidos</span>
+            </a>
+            <a class="option close" href="">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Separação</span>
+            </a> -->
+            <a class="option close" href="/printers" id="printers">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>Impressoras</span>
+            </a>
+            <a class="option close" href="/products" id="products">
+                <i class="fa-solid fa-cube"></i>
+                <span>Produtos</span>
+            </a>
+            <a class="option close" href="/tickets" id="tickets">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Manutenção</span>
+            </a>
+            <a class="option close" href="/users" id="users">
+                <i class="fa-solid fa-users"></i>
+                <span>Usuários</span>
+            </a>
+            <a class="option close" href="/config" id="config">
+                <i class="fa-solid fa-gear"></i>
+                <span>Configurações</span>
+            </a>
+        </div>
+        <div class="container">
+            <div class="content flex col" id="title">
+                <div class="struct-card row align-center space-between">
+                    <div class="flex align-center gap-1">
+                        <i class="fa-solid fa-user ct-user" id="user_icon"></i>    
+                        <h3 id="user_name"></h3>
+                    </div>
+                    <div>
+                        <button class="btn basic" onclick="logout()">Sair</button>
+                    </div>
+                </div>
+                <div class="struct-card row align-center" id="products_search">
+                    <select id="sel_printer" class="select"></select>
+                    <div class="btn primary" onclick="createTicket()"><i class="fa-solid fa-plus"></i>Criar</div>
+                </div>
+                <div class="struct-card w50" id="ct_1">
+                    <div class="tb-container">
+                        <table class="tb-table" id="items_table">
+                            <thead>
+                                <tr>
+                                    <th width="1">#</i></th>
+                                    <th>Status</th>
+                                    <th>Criado em</th>
+                                    <th>Ultima atualização</th>
+                                    <th>Concluído</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ticket_table">
+                                <!-- <tr style="cursor: pointer;">
+                                    <td>1</td>
+                                    <td>Aberto</td>
+                                    <td>Creality</td>
+                                    <td>Creality</td>
+                                    <td>Creality</td>
+                                </tr> -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    function setUser(){
+        const user = JSON.parse(localStorage.getItem("user"));
+        const user_name = document.querySelector("#user_name");
+
+        user_name.innerHTML = user.firstName;
+        const viewportWidth = window.innerWidth;
+
+        document.querySelector("#user_icon").classList.value = user.role == "admin" ? "fa-solid fa-crown ct-user" : "fa-solid fa-user ct-user";
+        
+        if(viewportWidth < 600){
+            user_name.style.fontSize = "1rem";
+        }
+    }
+    setUser();
+
+    function updateScreenSize() {
+        const viewportWidth = window.innerWidth;
+        const ct_1 = document.querySelector("#ct_1");
+
+        const isMobile = viewportWidth < 600;
+
+        ct_1.classList.toggle("w50", !isMobile);
+    }
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+
+    
+
+
+
+
+    const hover_elements = 
+    {
+        loading_spinner: document.querySelector("#loading_spinner"),
+        ifc_create_product: document.querySelector("#ifc_create_product")
+    }
+
+    const hover_container = document.querySelector(".hover-container");
+    hover_container.style.display = "none";
+
+    function toggleHoverContainer(el_id){
+        if(hover_container.style.display == "none"){
+            hover_container.style.display = "flex";
+
+            for (const [key, value] of Object.entries(hover_elements)) {
+            
+                if(key == el_id){
+                    value.style.display = "flex";
+                    continue;
+                }
+
+                value.style.display = "none";
+            }
+            
+        }else{
+            hover_container.style.display = "none";
+        }
+    }
+
+    const sel_printer = document.querySelector("#sel_printer");
+    const ticket_table = document.querySelector("#ticket_table");
+
+    async function main() {
+        let printer_data = await fetchInfo(`/api/v1/printers`);
+        printer_data = printer_data.data;
+
+        printer_sel_html = "";
+
+        for (const element of printer_data) {
+            printer_sel_html += `<option value="${element.id}">#${element.id} - ${element.label}</option>`;
+        }
+
+        sel_printer.innerHTML = printer_sel_html;
+
+        await showTickets(sel_printer.value);
+    }
+
+    main();
+
+    async function showTickets(id) {
+        let tickets_data = await fetchInfo(`/api/v1/tickets?printer_id=${id}`);
+        tickets_data = tickets_data.data;
+
+        let html = "";
+
+        for (const data of tickets_data) {
+            html += 
+            `
+            <tr style="cursor: pointer;" onclick="window.location.href = '${'/tickets/' + data.id}'">
+                <td width="1">${data.id}</td>
+                <td>${data.is_closed == 1 ? "Fechado" : "Aberto"}</td>
+                <td>${corDate(data.created_at)}</td>
+                <td>${corDate(data.updated_at)}</td>
+                <td>${corDate(data.closed_at)}</td>
+            </tr>
+            `;
+        }
+
+        ticket_table.innerHTML = html;
+    }
+
+    sel_printer.addEventListener('change', async e => {
+        await showTickets(sel_printer.value);
+    });
+    
+    async function createTicket() {
+        let response = await postData(`/api/v1/tickets`, "post", {
+            printer_id: sel_printer.value,
+        });
+
+        switch (response.code) {
+            case 201:
+                window.location.replace(`/tickets/${response.data.id}`);
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+    
+
+    function formatTime(time) {
+        const [hours, minutes, seconds] = time.split(':').map(Number);
+
+        const parts = [];
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        if (seconds > 0) parts.push(`${seconds}s`);
+
+        return parts.join(' ') || '0s';
+    }
+
+    function corDate(date){
+        if(!date) return "";
+
+        date = new Date(date)
+
+        date.setHours(date.getHours() - 3, date.getMinutes(), date.getSeconds())
+
+        date = date.toISOString();
+
+        var newDate = date.split(".")[0]
+        newDate = newDate.split("T");
+
+        var day = newDate[0].split("-")
+        return `${day[2]}/${day[1]}/${day[0]} ${newDate[1]}`;
+    }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+.inpt
+{
+    border: 1px solid var(--spacer);
+    padding: .5rem;
+    border-radius: .5rem;
+    transition: .1s ease;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.inpt > span
+{
+    position: absolute;
+    top: -26%;
+    left: .5rem;
+    background-color: var(--on_primary);
+    font-weight: 600;
+    color: var(--primary_darker);
+    padding : 0 2px;
+}
+
+
+.inpt > input
+{
+    width: 100%;
+    font-size: 1.2rem;
+    border: none;
+    outline: none;
+    padding-left: .5rem;
+    background-color: transparent;
+}
+
+.inpt:focus-within 
+{
+    outline: 2px solid var(--primary);
+}
+
+.action-btn
+{
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.inpt:focus-within .action-btn
+{
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.inpt.anim.error
+{
+    animation: inpt-error 1s ease-in;
+    border: none;
+}
+
+.inpt.anim.success
+{
+    animation: inpt-success 1s ease-in;
+    border: none;
+}
+
+
+.textarea
+{
+    resize: none;
+    border-radius: .5rem;
+    border: none;
+    outline: 3px solid var(--primary);
+    padding: 1rem;
+}
+
+@keyframes inpt-error
+{
+    0%
+    {
+        background-color: transparent;
+        outline: 2px solid transparent;
+    }
+    50%
+    {
+        background-color: var(--warning);
+        outline: 2px solid var(--warning_darker);
+    }
+    100%
+    {
+        background-color: transparent;
+        outline: 2px solid transparent;
+    }
+}
+
+@keyframes inpt-success
+{
+    0%
+    {
+        background-color: transparent;
+        outline: 2px solid transparent;
+    }
+    50%
+    {
+        background-color: var(--primary);
+        outline: 2px solid var(--primary_darker);
+    }
+    100%
+    {
+        background-color: transparent;
+        outline: 2px solid transparent;
+    }
+}
+

@@ -1,6 +1,6 @@
 
 module.exports = {
-    printer_brand_id:
+    printer_model_id:
     {
         in: ["body"],
         isInt: {
@@ -13,8 +13,8 @@ module.exports = {
         in: ["body"],
         isString: true,
         isLength: {
-            errorMessage: 'Field "label" must be at least 6 chars long and max 32.',
-            options: { min: 6, max: 32  }
+            errorMessage: 'Field "label" must be at least 2 chars long and max 32.',
+            options: { min: 2, max: 32  }
         }
     },
     z_displacement:

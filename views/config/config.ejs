@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
+    <script src="/public/scripts/http_helper.js"></script>
+    <script src="/public/scripts/get_user.js"></script>
+    <script src="/public/scripts/notifications.js" defer></script>
+    <script src="/public/scripts/inputs.js" defer></script>
+    <script src="/public/scripts/tab_switch.js" defer></script>
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/side_tab.css">
+    <link rel="stylesheet" href="/public/styles/buttons.css">
+    <link rel="stylesheet" href="/public/styles/structure_cards.css">
+    <link rel="stylesheet" href="/public/styles/grid_table.css">
+    <link rel="stylesheet" href="/public/styles/info_card.css">
+    <link rel="stylesheet" href="/public/styles/inputs.css">
+    <link rel="stylesheet" href="/public/styles/select.css">
+
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div>
+            <i class="fa-solid fa-check"></i>
+            <div>
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="hover-container">        
+        <div class="ifc-loading 3" id="loading_spinner">
+            <div class="lds-dual-ring"></div>
+            <label for="">Aguarde...</label>
+        </div>
+        <div class="info-card w35" id="ifc_create_model">
+            <div class="ifc-header">
+                <h3>Adicionar Modelo</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <select id="sel_model" class="select"></select>
+                <div class="inpt">
+                    <span>Nome do Modelo</span>
+                    <input type="text" id="inpt_model_name">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="createModels()">Salvar</button>
+            </div>
+        </div>        
+        <div class="info-card w35" id="ifc_create_material">
+            <div class="ifc-header">
+                <h3>Adicionar Material</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <div class="inpt">
+                    <span>Nome do Material</span>
+                    <input type="text" id="inpt_material_name">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="createMaterial()">Salvar</button>
+            </div>
+        </div>
+        <div class="info-card w35" id="ifc_create_brand">
+            <div class="ifc-header">
+                <h3>Adicionar Marca</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <div class="inpt">
+                    <span>Nome da Marca</span>
+                    <input type="text" id="inpt_brand_name">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="createBrand()">Salvar</button>
+            </div>
+        </div>
+        <div class="info-card w35" id="ifc_create_filament">
+            <div class="ifc-header">
+                <h3>Adicionar Filamento</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <select class="select" id="sl_brand"></select>
+                <select class="select" id="sl_material"></select>
+                <div class="inpt">
+                    <span>Cor</span>
+                    <input type="text" id="inpt_color">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="createFilament()">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="side-nav close" id="side_nav">
+            <div class="option close switch" id="tab_sw" href="">
+                <i class="fa-solid fa-bars"></i>
+                <img src="/public/images/logo.png" alt="3D Farm" draggable="false">
+            </div>
+            <!-- <a class="option close" href="/jobs" id="jobs">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Pedidos</span>
+            </a>
+            <a class="option close" href="">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Separação</span>
+            </a> -->
+            <a class="option close" href="/printers" id="printers">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>Impressoras</span>
+            </a>
+            <a class="option close" href="/products" id="products">
+                <i class="fa-solid fa-cube"></i>
+                <span>Produtos</span>
+            </a>
+            <a class="option close" href="/tickets" id="tickets">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Manutenção</span>
+            </a>
+            <a class="option close" href="/users" id="users">
+                <i class="fa-solid fa-users"></i>
+                <span>Usuários</span>
+            </a>
+            <a class="option close" href="/config" id="config">
+                <i class="fa-solid fa-gear"></i>
+                <span>Configurações</span>
+            </a>
+        </div>
+        <div class="container">
+            <div class="content flex col" id="title">
+                <div class="struct-card row align-center space-between">
+                    <div class="flex align-center gap-1">
+                        <i class="fa-solid fa-user ct-user" id="user_icon"></i>    
+                        <h3 id="user_name"></h3>
+                    </div>
+                    <div>
+                        <button class="btn basic" onclick="logout()">Sair</button>
+                    </div>
+                </div>
+                <div class="struct-card row align-center" id="sw_title">
+                    <button class="btn tab-switch basic" onclick="switchTabs(this)" data-show="true" data-tab-id="1">Modelos</button>
+                    <button class="btn tab-switch basic" onclick="switchTabs(this)" data-show="false" data-tab-id="2">Materiais</button>
+                    <button class="btn tab-switch basic" onclick="switchTabs(this)" data-show="false" data-tab-id="3">Filamento Marca</button>
+                    <button class="btn tab-switch basic" onclick="switchTabs(this)" data-show="false" data-tab-id="4">Filamento</button>
+                </div>
+            </div>
+            <div class="content tab flex align-start" data-tab-id="1" data-display="">
+                <div class="struct-card w35" id="ct_1">
+                    <div class="flex row align-end">
+                        <div class="btn primary" onclick="toggleHoverContainer('ifc_create_model')">Adicionar Modelo</div>
+                    </div>
+                    <div class="tb-container">
+                        <table class="tb-table">
+                            <thead>
+                                <tr>
+                                    <th>Modelo</th>
+                                    <th>Marca</th>
+                                    <th width="1"><i class="fa-solid fa-location-arrow"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tb_model">
+                                <!-- <tr>
+                                    <td>PLA</td>
+                                    <td><i class="fa-solid fa-trash"></i></td>
+                                </tr> -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="content tab flex align-start" data-tab-id="2" data-display="">
+                <div class="struct-card w35" id="ct_1">
+                    <div class="flex row align-end">
+                        <div class="btn primary" onclick="toggleHoverContainer('ifc_create_material')">Adicionar Material</div>
+                    </div>
+                    <div class="tb-container">
+                        <table class="tb-table">
+                            <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th width="1"><i class="fa-solid fa-location-arrow"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tb_material">
+                                <!-- <tr>
+                                    <td>PLA</td>
+                                    <td><i class="fa-solid fa-trash"></i></td>
+                                </tr> -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="content tab flex align-start" data-tab-id="3" data-display="">
+                <div class="struct-card w35" id="ct_2">
+                    <div class="flex row align-end">
+                        <div class="btn primary" onclick="toggleHoverContainer('ifc_create_brand')">Adicionar Marca</div>
+                    </div>
+                    <div class="tb-container">
+                        <table class="tb-table">
+                            <thead>
+                                <tr>
+                                    <th>Marca</th>
+                                    <th width="1"><i class="fa-solid fa-location-arrow"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tb_brand">
+                                <!-- <tr>
+                                    <td>Voolt</td>
+                                    <td><i class="fa-solid fa-trash"></i></td>
+                                </tr> -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="content tab flex align-start" data-tab-id="4" data-display="">
+                <div class="struct-card w35" id="ct_3">
+                    <div class="flex row align-end">
+                        <div class="btn primary" onclick="toggleHoverContainer('ifc_create_filament')">Adicionar Filamento</div>
+                    </div>
+                    <div class="tb-container">
+                        <table class="tb-table">
+                            <thead>
+                                <tr>
+                                    <th>Marca</th>
+                                    <th>Material</th>
+                                    <th>Cor</th>
+                                    <th width="1"><i class="fa-solid fa-location-arrow"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tb_filaments">
+                                <tr>
+                                    <!-- <td>Voolt</td>
+                                    <td>PLA</td>
+                                    <td>Preto</td>
+                                    <td><i class="fa-solid fa-trash"></i></td> -->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    function setUser(){
+        const user = JSON.parse(localStorage.getItem("user"));
+        const user_name = document.querySelector("#user_name");
+        const user_icon = document.querySelector("#user_icon");
+
+        user_name.innerHTML = user.firstName;
+        const viewportWidth = window.innerWidth;
+
+        document.querySelector("#user_icon").classList.value = user.role == "admin" ? "fa-solid fa-crown ct-user" : "fa-solid fa-user ct-user";
+        
+        if(viewportWidth < 600){
+            user_name.style.fontSize = "1rem";
+        }
+    }
+    setUser();
+
+    function updateScreenSize() {
+        const viewportWidth = window.innerWidth;
+        const ct_1 = document.querySelector("#ct_1");
+        const ct_2 = document.querySelector("#ct_2");
+        const ct_3 = document.querySelector("#ct_3");
+        const sw_title = document.querySelector("#sw_title");
+
+        const isMobile = viewportWidth < 600;
+
+        ct_1.classList.toggle("w35", !isMobile);
+        ct_2.classList.toggle("w35", !isMobile);
+        ct_3.classList.toggle("w35", !isMobile);
+
+        sw_title.classList.toggle("row", !isMobile);
+        sw_title.classList.toggle("col", isMobile);
+    }
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+
+    async function switchTabs(e)
+    {
+        if(e.dataset.show === "true") return;
+
+        if(!!e.dataset.function){
+            await tabFunction[e.dataset.function]()
+        }
+
+        e.classList.add("selected")
+        e.dataset.show = "true"
+        e.scrollIntoView();
+
+        document.querySelectorAll(".btn.tab-switch").forEach(el => {
+            if(el.dataset.tabId != e.dataset.tabId ){
+                el.classList.remove("selected")
+                el.dataset.show = "false"
+            }
+        })
+
+        document.querySelectorAll(".content.tab").forEach(el => {
+            if(el.dataset.tabId != e.dataset.tabId ){
+                el.style.display = "none"
+            }else{
+                console.log()
+                el.style.display = el.dataset.display;
+            }
+        })
+    }
+
+    function defineTabs(){
+        let tab_id;
+
+        document.querySelectorAll(".btn.tab-switch").forEach(el => {
+            if(el.dataset.show === "true" ){
+                el.classList.add("selected")
+                tab_id = el.dataset.tabId;
+            }else{
+                el.classList.remove("selected")
+                el.dataset.show = "false"
+            }
+        })
+
+        document.querySelectorAll(".content.tab").forEach(el => {
+            if(el.dataset.tabId != tab_id ){
+                el.style.display = "none"
+            }else{
+                el.style.display = el.dataset.display;
+            }
+        })
+    }
+
+    defineTabs()
+
+    const hover_elements = 
+    {
+        loading_spinner: document.querySelector("#loading_spinner"),
+        ifc_create_material: document.querySelector("#ifc_create_material"),
+        ifc_create_brand: document.querySelector("#ifc_create_brand"),
+        ifc_create_filament: document.querySelector("#ifc_create_filament"),
+        ifc_create_model: document.querySelector("#ifc_create_model"),
+    }
+
+    const hover_container = document.querySelector(".hover-container");
+    hover_container.style.display = "none";
+
+    function toggleHoverContainer(el_id){
+        if(hover_container.style.display == "none"){
+            hover_container.style.display = "flex";
+
+            for (const [key, value] of Object.entries(hover_elements)) {
+            
+                if(key == el_id){
+                    value.style.display = "flex";
+                    continue;
+                }
+
+                value.style.display = "none";
+            }
+            
+        }else{
+            hover_container.style.display = "none";
+        }
+    }
+
+
+    const tb_material = document.querySelector("#tb_material");
+    const inpt_material_name = document.querySelector("#inpt_material_name");
+
+    const tb_brand = document.querySelector("#tb_brand");
+    const inpt_brand_name = document.querySelector("#inpt_brand_name");
+
+    const tb_filaments = document.querySelector("#tb_filaments");
+    const sl_brand = document.querySelector("#sl_brand");
+    const sl_material = document.querySelector("#sl_material");
+    const inpt_color = document.querySelector("#inpt_color");
+    
+    const tb_model = document.querySelector("#tb_model");
+    const sel_model = document.querySelector("#sel_model");
+    const inpt_model_name = document.querySelector("#inpt_model_name");
+
+    async function main(params) {
+        showModels();
+        showMaterials();
+        showBrand();
+        showFilaments();
+    }
+
+    main();
+
+    async function showMaterials() {
+        let material_data = await fetchInfo(`/api/v1/printers/filaments/materials`);
+        material_data = material_data.data;
+
+        let table_html = "";
+        let select_html = "";
+
+        for (const data of material_data) {
+            table_html += 
+            `
+            <tr>
+                <td>${data.label}</td>
+                <td><i class="fa-solid fa-trash" style="color:var(--primary_darker); cursor: pointer" onclick="deleteMaterial(${data.id})"></i></td>
+            </tr>
+            `;
+
+            select_html += `<option value="${data.id}">${data.label}</option>`;
+        }
+
+        sl_material.innerHTML = select_html;
+        tb_material.innerHTML = table_html;
+    }
+
+    async function deleteMaterial(id) {
+        if(!confirm("Tem certeza que deseja deletar?")) return
+
+        let response = await fetchInfo(`/api/v1/printers/filaments/materials/${id}`, "delete");
+
+        switch (response.code) {
+            case 200:
+                await showMaterials();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 403:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error")
+                return;
+        }
+    }
+
+    async function createMaterial() {
+        if(inpt_material_name.value < 1){
+            return pushNotify("error", "Insira um valor!");
+        }
+
+        let response = await postData(`/api/v1/printers/filaments/materials`, "post", {
+            label: inpt_material_name.value,
+        });
+
+        switch (response.code) {
+            case 201:
+                inpt_material_name.value = "";
+                await showMaterials();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+    async function showBrand() {
+        let brand_data = await fetchInfo(`/api/v1/printers/filaments/brands`);
+        brand_data = brand_data.data;
+
+        let table_html = "";
+        let select_html = "";
+
+        for (const data of brand_data) {
+            table_html += 
+            `
+            <tr>
+                <td>${data.label}</td>
+                <td><i class="fa-solid fa-trash" style="color:var(--primary_darker); cursor: pointer" onclick="deleteBrands(${data.id})"></i></td>
+            </tr>
+            `;
+
+            select_html += `<option value="${data.id}">${data.label}</option>`;
+        }
+
+        sl_brand.innerHTML = select_html;
+        tb_brand.innerHTML = table_html;
+    }
+
+    async function deleteBrands(id) {
+        if(!confirm("Tem certeza que deseja deletar?")) return
+
+        let response = await fetchInfo(`/api/v1/printers/filaments/brands/${id}`, "delete");
+
+        switch (response.code) {
+            case 200:
+                await showBrand();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 403:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error")
+                return;
+        }
+    }
+
+    async function createBrand() {
+        if(inpt_brand_name.value < 1){
+            return pushNotify("error", "Insira um valor!");
+        }
+
+        let response = await postData(`/api/v1/printers/filaments/brands`, "post", {
+            label: inpt_brand_name.value,
+        });
+
+        switch (response.code) {
+            case 201:
+                inpt_brand_name.value = "";
+                await showBrand();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+    async function showFilaments() {
+        let filaments = await fetchInfo(`/api/v1/printers/filaments`);
+        filaments = filaments.data;
+
+        let table_html = "";
+        for (const data of filaments) {
+            table_html += 
+            `
+            <tr>                
+                <td>${data.filament_brand_name}</td>
+                <td>${data.material}</td>
+                <td>${data.color}</td>
+                <td><i class="fa-solid fa-trash" style="color:var(--primary_darker); cursor: pointer" onclick="deleteFilament(${data.id})"></i></td>
+            </tr>
+            `;
+        }
+
+        tb_filaments.innerHTML = table_html;
+    }
+
+    async function deleteFilament(id) {
+        if(!confirm("Tem certeza que deseja deletar?")) return
+
+        let response = await fetchInfo(`/api/v1/printers/filaments/${id}`, "delete");
+
+        switch (response.code) {
+            case 200:
+                await showFilaments();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error")
+                return;
+        }
+    }
+
+    async function createFilament() {
+        if(inpt_color.value < 1){
+            return pushNotify("error", "Insira um valor!");
+        }
+
+        console.log(inpt_color.value)
+
+        let response = await postData(`/api/v1/printers/filaments`, "post", {
+            filament_brand_id: sl_brand.value,
+            material_id: sl_material.value,
+            color: inpt_color.value,
+        });
+
+        switch (response.code) {
+            case 201:
+                inpt_color.value = "";
+                await showFilaments();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+    async function showModels() {
+        let models_data = await fetchInfo(`/api/v1/printers/models`);
+        models_data = models_data.data;
+
+        let models_brands = await fetchInfo(`/api/v1/printers/brands`);
+        models_brands = models_brands.data;
+
+        let table_html = "";
+        let select_html = "";
+
+        for (const data of models_data) {
+            table_html += 
+            `
+            <tr>
+                <td>${data.label}</td>
+                <td>${data.printer_brand_name}</td>
+                <td><i class="fa-solid fa-trash" style="color:var(--primary_darker); cursor: pointer" onclick="deleteModels(${data.id})"></i></td>
+            </tr>
+            `;
+        }
+
+        for (const data of models_brands) {
+            select_html += `<option value="${data.id}">${data.label}</option>`;
+        }
+
+        sel_model.innerHTML = select_html;
+        tb_model.innerHTML = table_html;
+    }
+    
+    async function createModels() {
+        if(inpt_model_name.value < 1){
+            return pushNotify("error", "Insira um valor!");
+        }
+
+        let response = await postData(`/api/v1/printers/models`, "post", {
+            printer_brand_id: 1,
+            label: inpt_model_name.value
+        });
+
+        switch (response.code) {
+            case 201:
+                inpt_color.value = "";
+                await showModels();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+    
+    async function deleteModels(id) {
+        if(!confirm("Tem certeza que deseja deletar?")) return
+
+        let response = await fetchInfo(`/api/v1/printers/models/${id}`, "delete");
+
+        switch (response.code) {
+            case 200:
+                await showModels();
+                return;
+            case 403:
+                pushNotify("error", response.message);
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error")
+                return;
+        }
+    }
+
+    </script>
+</body>
+</html>

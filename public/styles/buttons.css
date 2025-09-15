@@ -1,0 +1,106 @@
+.btn
+{
+    padding: .6rem 1.5rem;
+    outline: none;
+    border: none;
+    border-radius: 2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: .1s ease-in-out;
+    text-decoration: none;
+    color: var(--text_base);
+}
+
+.btn.basic
+{
+    background-color: transparent;
+    border: 1px solid transparent
+}
+
+.btn.basic:hover
+{
+    border: 1px solid var(--spacer);
+}
+
+.btn.basic:active
+{
+    background-color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn.basic.selected
+{
+    position: relative;
+    border: 1px solid var(--primary);
+    overflow: hidden;
+}
+
+.btn.primary
+{
+    background-color: var(--primary);
+    color: var(--on_primary);
+}
+
+.btn.primary.selected
+{
+    background-color: var(--on_primary);
+    color: var(--primary_darker);
+    position: relative;
+    border: 1px solid var(--primary);
+    overflow: hidden;
+}
+
+.btn.primary.selected:hover
+{
+    background-color: var(--on_primary);
+    border: 1px solid var(--primary);
+    color: var(--primary_darker);
+}
+
+
+.btn.primary:hover
+{
+    background-color: var(--primary_darker);
+    color: var(--on_primary);
+}
+
+.btn > i
+{
+    padding-right: .5rem;
+}
+
+.btn > i.loading
+{
+    margin-right: .5rem;
+    padding-right: 0;
+    animation: loading 1s infinite;
+}
+
+.btn-simple
+{
+    text-decoration: underline;
+    color: var(--primary_darker);
+    cursor: pointer;
+}
+
+.btn.inactive
+{
+    background-color: var(--inactive);
+    color: white;
+}
+
+.btn.btn.primary:disabled
+{
+    background-color: var(--inactive);
+    color: white;
+}
+
+@keyframes loading {
+    0%{
+        transform: rotate(0);
+    }
+    100%{
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressora</title>
+    <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
+    <script src="/public/scripts/http_helper.js"></script>
+    <script src="/public/scripts/get_user.js"></script>
+    <script src="/public/scripts/notifications.js" defer></script>
+    <script src="/public/scripts/inputs.js" defer></script>
+    <script src="/public/scripts/tab_switch.js" defer></script>
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/side_tab.css">
+    <link rel="stylesheet" href="/public/styles/buttons.css">
+    <link rel="stylesheet" href="/public/styles/structure_cards.css">
+    <link rel="stylesheet" href="/public/styles/grid_table.css">
+    <link rel="stylesheet" href="/public/styles/info_card.css">
+    <link rel="stylesheet" href="/public/styles/inputs.css">
+    <link rel="stylesheet" href="/public/styles/select.css">
+
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div>
+            <i class="fa-solid fa-check"></i>
+            <div>
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="hover-container">        
+        <div class="ifc-loading" id="loading_spinner">
+            <div class="lds-dual-ring"></div>
+            <label for="">Aguarde...</label>
+        </div>
+        <div class="info-card w35" id="link_filament">
+            <div class="ifc-header">
+                <h3>Vincular Filamento</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <select class="select" id="filament_select"></select>
+                <div class="inpt">
+                    <span>Peso Rolo (Gramas)</span>
+                    <input type="number" id="filament_weigth">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="linkFilament()">Vincular</button>
+            </div>
+        </div>
+        <div class="info-card w35" id="create_job">
+            <div class="ifc-header">
+                <h3>Criar Trabalho</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <div class="inpt">
+                    <input placeholder="Insira sku do produto" id="product_input" type="text">
+                </div>
+                    <div class="tb-container" style="max-height: 50vh;">
+                        <table class="tb-table">
+                            <thead>
+                                <tr>
+                                    <th width="1"><i class="fa-solid fa-location-arrow"></i></th>
+                                    <th>Sku</th>
+                                    <th>Peso Bruto</th>
+                                    <th>Quantidade</th>
+                                    <th>Tempo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product_tb_res">
+                                <!-- <tr>
+                                    <td><input type="checkbox" name="" id=""></td>
+                                    <td>TD0045</td>
+                                    <td>55g</td>
+                                    <td>1</td>
+                                    <td>15m 5s</td>
+                                </tr> -->
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="selectProduct()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="side-nav close" id="side_nav">
+            <div class="option close switch" id="tab_sw" href="">
+                <i class="fa-solid fa-bars"></i>
+                <span>3D System</span>
+            </div>
+            <!-- <a class="option close" href="/jobs" id="jobs">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Pedidos</span>
+            </a>
+            <a class="option close" href="">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Separação</span>
+            </a> -->
+            <a class="option close" href="/printers" id="printers">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>Impressoras</span>
+            </a>
+            <a class="option close" href="/products" id="products">
+                <i class="fa-solid fa-cube"></i>
+                <span>Produtos</span>
+            </a>
+            <a class="option close" href="/tickets" id="tickets">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Manutenção</span>
+            </a>
+            <a class="option close" href="/users" id="users">
+                <i class="fa-solid fa-users"></i>
+                <span>Usuários</span>
+            </a>
+            <a class="option close" href="/config" id="config">
+                <i class="fa-solid fa-gear"></i>
+                <span>Configurações</span>
+            </a>
+        </div>
+        <div class="container">
+            <div class="content flex col" id="title">
+                <div class="struct-card row align-center space-between">
+                    <div class="flex align-center gap-1">
+                        <i class="fa-solid fa-user ct-user" id="user_icon"></i>    
+                        <h3 id="user_name"></h3>
+                    </div>
+                    <div>
+                        <button class="btn basic" onclick="logout()">Sair</button>
+                    </div>
+                </div>
+                <div class="struct-card row align-center space-between" id="printer_title">
+                    <!-- <div class="flex align-center">
+                        <h2>#1 - K1 MAX</h2>
+                        <span style="color: var(--primary_darker);">ATIVA</span>
+                    </div>
+                    <div class="btn primary">Inativar</div> -->
+                </div>
+                <div class="struct-card row align-center space-between" id="ct_2">
+                    <div class="flex" id="printer_actions">
+                        <!-- <button class="btn primary"><i class="fa-solid fa-play"></i>Iniciar</button>
+                        <button class="btn primary" disabled><i class="fa-solid fa-pause"></i>Pausar</button>
+                        <button class="btn primary" disabled><i class="fa-solid fa-stop"></i>Parar</button> -->
+                    </div>
+                    <div id="printer_progress">
+                        <!-- <h2>7% - 15m</h2> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content flex align-start" id="ct_1">
+                <div class="struct-card over_h" id="mn-1">
+                    <div class="flex">
+                        <div class="btn primary" onclick="loadJobIFC()">Adicionar Trabalho</div>
+                    </div>
+                    <!-- <div class="flex col">
+                        <div class="flex space-between">
+                            <div class="flex align-center">
+                                <h3>TD00106</h3>
+                                <span>Em Impressão</span>
+                            </div>
+                            <div>
+                                <div class="btn primary">Imprimir</div>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="tb-container">
+                        <table class="tb-table">
+                            <thead>
+                                <tr>
+                                    <th width="1">#</th>
+                                    <th>Produto</th>
+                                    <th>Status</th>
+                                    <th>Peso Bruto</th>
+                                    <th>Quantidade</th>
+                                    <th>Tempo de Impressão</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jobs_table">
+                                <!-- <tr>
+                                    <td>#1</td>
+                                    <td>TD0001</td>
+                                    <td>Em Impressão</td>
+                                    <td>350g</td>
+                                    <td>1</td>
+                                    <td>00:25:45</td>
+                                </tr> -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="struct-card w35" id="printer_info_holder">
+                    <span class="lb-title">
+                        <i class="fa-solid fa-coins"></i>
+                        <span>Filamento</span>
+                    </span>
+                    <div class="flex align-start">
+                        <div class="btn primary" onclick="loadFilamentIFC()">Vincular Filamento</div>
+                    </div>
+                    <p class="flex space-between" id="filament_info"></p>
+                    <p class="flex space-between" id="filament_info_qty"></p>
+                    <p class="flex space-between" id="filament_select_qty"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    function setUser(){
+        const user = JSON.parse(localStorage.getItem("user"));
+        const user_name = document.querySelector("#user_name");
+
+        user_name.innerHTML = user.firstName;
+        const viewportWidth = window.innerWidth;
+
+        document.querySelector("#user_icon").classList.value = user.role == "admin" ? "fa-solid fa-crown ct-user" : "fa-solid fa-user ct-user";
+        
+        if(viewportWidth < 600){
+            user_name.style.fontSize = "1rem";
+        }
+    }
+    setUser();
+
+    function updateScreenSize() {
+        const viewportWidth = window.innerWidth;
+        const ct_1 = document.querySelector("#ct_1");
+        const ct_2 = document.querySelector("#ct_2");
+        const printer_info_holder = document.querySelector("#printer_info_holder");
+        const printer_title = document.querySelector("#printer_title");
+        const printer_actions = document.querySelector("#printer_actions");
+        
+
+        const isMobile = viewportWidth < 600;
+
+        ct_1.classList.toggle("col-rev", isMobile);
+        printer_info_holder.classList.toggle("w35", !isMobile);
+
+        printer_title.classList.toggle("row", !isMobile);
+        printer_title.classList.toggle("align-center", !isMobile);
+        printer_title.classList.toggle("col", isMobile);
+
+        ct_2.classList.toggle("row", !isMobile);
+        ct_2.classList.toggle("align-center", !isMobile);
+        ct_2.classList.toggle("col", isMobile);
+
+        printer_actions.classList.toggle("col", isMobile);
+        printer_actions.classList.toggle("align-start", isMobile);
+
+    }
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+
+    
+
+
+
+
+    const hover_elements = 
+    {
+        loading_spinner: document.querySelector("#loading_spinner"),
+        link_filament: document.querySelector("#link_filament"),
+        create_job: document.querySelector("#create_job"),
+    }
+
+    const hover_container = document.querySelector(".hover-container");
+    hover_container.style.display = "none";
+
+    function toggleHoverContainer(el_id){
+        if(hover_container.style.display == "none"){
+            hover_container.style.display = "flex";
+
+            for (const [key, value] of Object.entries(hover_elements)) {
+            
+                if(key == el_id){
+                    value.style.display = "flex";
+                    continue;
+                }
+
+                value.style.display = "none";
+            }
+            
+        }else{
+            hover_container.style.display = "none";
+        }
+    }
+
+    let socket;
+    let isSocketOpen = false;
+
+    const params = window.location.pathname.split("/");
+    const printer_id = params[2];
+
+    const printer_title = document.querySelector("#printer_title");
+    const printer_actions = document.querySelector("#printer_actions");
+    const printer_progress = document.querySelector("#printer_progress")
+
+    const filament_info = document.querySelector("#filament_info");
+    const filament_info_qty = document.querySelector("#filament_info_qty");
+
+    const filament_select = document.querySelector("#filament_select");
+    const filament_weigth = document.querySelector("#filament_weigth");
+    const filament_select_qty = document.querySelector("#filament_select_qty");
+
+    const product_input = document.querySelector("#product_input");
+    const product_tb_res = document.querySelector("#product_tb_res");
+
+    const jobs_table = document.querySelector("#jobs_table");
+
+    async function main() {
+        let printer_data = await fetchInfo(`/api/v1/printers/${printer_id}`);
+        printer_data = printer_data.data[0];
+
+        printer_title.innerHTML = 
+        `
+            <div class="flex align-center">
+                <h2>#${printer_data.id} - ${printer_data.label}</h2>
+                <span style="color: var(--primary_darker);">${printer_data.is_active == 1 ? "ATIVA" : "INATIVA"}</span>
+            </div>
+            <div class="flex align-center">
+                <button class="btn primary" onclick="resetPrinterJob()">Resetar</button>
+                <button class="btn primary" onclick="togglePrinter()">${printer_data.is_active == 1 ? "Inativar" : "Ativar"}</button>
+            </div>
+        `;
+
+        printer_title.dataset.printer_model_id = printer_data.printer_model_id;
+
+        if(printer_data.is_active != 1){
+            document.querySelector("#mn-1").style.display = "none";
+            printer_info_holder.style.display = "none";
+            return;
+        }
+
+        switch (printer_data.printer_status_id) {
+            case 1:
+                printer_actions.innerHTML = 
+                `
+                    <button class="btn primary" onclick="printerInit()"><i class="fa-solid fa-play"></i>Iniciar</button>
+                `;
+
+                printer_progress.dataset.cur_job_id = "";
+                break;
+            case 2:
+                printer_actions.innerHTML = 
+                `
+                    <button class="btn primary" onclick="concludeCurrentJobs()"><i class="fa-solid fa-check"></i>Concluir</button>
+                    <button class="btn primary" onclick="resetCurrentJob()"><i class="fa-solid fa-rotate"></i>Resetar Trabalho</button>
+                    <button class="btn primary" onclick="printerStop()"><i class="fa-solid fa-stop"></i>Parar</button>
+                `;            
+
+                let cur_job_data = await fetchInfo(`/api/v1/printers/${printer_id}/current_job`);
+                cur_job_data = cur_job_data.data[0];
+
+                printer_progress.dataset.cur_job_id = cur_job_data.id;
+            break;
+            default:
+                break;
+        }
+
+        printer_progress.innerHTML = printer_data.printer_status_id == 1 ? "<h2>Esperando...</h2>": "";
+
+        showFilament();
+        showJobs();
+
+        initConnection(printer_data.connection["IP"].value);
+
+
+    }
+
+    main();
+
+    async function showJobs() {
+        let jobs = await fetchInfo(`/api/v1/jobs?printer_id=${printer_id}&status_id=1,2,3`);
+        jobs = jobs.data;
+
+        let total_weigh = 0;
+
+        let table_html = "";
+
+        for (let i = 0; i < jobs.length; i++) {
+            const job = jobs[i];
+            
+            table_html += 
+            `
+            <tr>
+                <td>#${i+1}</td>
+                <td>${job.sku}</td>
+                <td>${job.job_status}</td>
+                <td>${job.weight_gross}g</td>
+                <td>${job.quantity}</td>
+                <td>${formatTime(job.print_time)}</td>
+            </tr>
+            `;
+
+            total_weigh += job.weight_gross;
+        }
+
+        filament_select_qty.innerHTML = `<b>Quantidade Selecionada:</b> ${total_weigh}g`;
+        jobs_table.innerHTML = table_html;
+    }
+
+    async function showFilament() {
+        let current_filament_data = await fetchInfo(`/api/v1/printers/filaments/current?printer_id=${printer_id}`);
+        current_filament_data = current_filament_data.data[0];
+
+        if(!current_filament_data) return;
+
+        filament_info.dataset.cur_filament_id = current_filament_data.id;
+        filament_info.dataset.brand_id = current_filament_data.filament.filament_brand_id;
+        filament_info.dataset.material_id = current_filament_data.filament.material_id;
+        filament_info.filament_current_qty = current_filament_data.current_quantity;
+
+        filament_info.innerHTML = `<b>Filamento:</b> ${current_filament_data.filament.filament_brands_name} - ${current_filament_data.filament.material_name} -${current_filament_data.filament.color}`;
+        filament_info_qty.innerHTML = `<b>Quantidade:</b> ${current_filament_data.current_quantity}g/${current_filament_data.entry_quantity}g`;
+    }
+
+    async function loadFilamentIFC() {
+        toggleHoverContainer('link_filament');
+
+        let filament_data = await fetchInfo(`/api/v1/printers/filaments`);
+        filament_data = filament_data.data;
+
+        sel_html = "";
+
+        filament_data.forEach(element => {
+            sel_html += `<option value="${element.id}">${element.filament_brand_name} - ${element.material} - ${element.color}</option>`
+        });
+
+        filament_select.innerHTML = sel_html;
+    }
+
+    async function linkFilament() {
+        if(filament_weigth.value < 1){
+            return pushNotify("error", "Insira um valor maior que zero!");
+        }
+
+        let response = await postData(`/api/v1/printers/filaments/current`, "post", {
+            printer_id: printer_id,
+            filament_id: filament_select.value,
+            entry_quantity: filament_weigth.value,
+            current_quantity: filament_weigth.value
+        });
+
+        switch (response.code) {
+            case 201:
+                await showFilament();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+    async function loadJobIFC() {
+        if(!filament_info.dataset.cur_filament_id){
+            return pushNotify("error", "Vincule um filamento para criar um trabalho.");
+        }
+
+        toggleHoverContainer('create_job');
+    }
+
+    product_input.addEventListener("input", async e => {
+
+        if(product_input.value == "") return;
+
+        let products = await fetchInfo(`/api/v1/products?q=${product_input.value}&printer_model_id=${printer_title.dataset.printer_model_id}&filament_brand_id=${filament_info.dataset.brand_id}&filament_material_id=${filament_info.dataset.material_id}&has_file=true`);
+        products = products.data;
+
+        let table_html = "";
+
+        for (const product of products) {
+            table_html += 
+            `
+            <tr>
+                <td><input data-product_id="${product.id}" data-wg="${product.weight_gross}" type="checkbox"></td>
+                <td>${product.sku}</td>
+                <td>${product.weight_gross}g</td>
+                <td>${product.quantity}</td>
+                <td>${formatTime(product.print_time)}</td>
+            </tr>
+            `;
+        }
+
+        product_tb_res.innerHTML = table_html;
+    })
+
+    async function selectProduct() {
+        const all_selections = product_tb_res.querySelectorAll("tr input:checked");
+
+        let current_qty = parseInt(filament_info.filament_current_qty);
+        let total_qty = 0;
+
+        for (const element of all_selections) {
+            total_qty += parseInt(element.dataset.wg);
+        }
+
+        if(total_qty > current_qty){
+            return pushNotify("error", "Quantida selecionada possui peso maior que o disponível no rolo.");
+        }
+
+        for (const element of all_selections) {
+            let response = await postData(`/api/v1/jobs`, "post", {
+                printer_id: printer_id,
+                product_id: element.dataset.product_id,
+            });
+
+            switch (response.code) {
+                case 400:
+                    pushNotify("error", response.message);
+                    return;
+                case 500:
+                    pushNotify("error", "Server Error");
+                    return;
+            }
+        }
+
+        let response = await postData(`/api/v1/printers/filaments/current/${filament_info.dataset.cur_filament_id}`, "put", {
+            current_quantity: current_qty - total_qty
+        });
+
+        switch (response.code) {
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+
+        await showJobs()
+        await showFilament();
+        toggleHoverContainer();
+    }
+
+    async function printerInit() {
+        let init_data = await fetchInfo(`/api/v1/printers/${printer_id}/init`);
+
+        printerStart(init_data.data.file);
+        await sleep(1000);
+        await main();
+        printer_progress.innerHTML = `<h2>Preparando...</h2>`;
+    }
+
+    function printerStart(file){
+        if (isSocketOpen) {
+            const comando = {
+                method: "set",
+                params: {
+                    opGcodeFile: `printprt:/usr/data/printer_data/gcodes/${file}`
+                }
+            };
+
+            // Envia o comando via WebSocket
+            socket.send(JSON.stringify(comando));
+            console.log('Comando enviado:', comando);
+        } else {
+            console.log('Aguardando conexão WebSocket...');
+        }
+    }
+
+    async function printerStop(){
+        if (isSocketOpen) {
+            const comando = {
+                method: "set",
+                params: {
+                   stop: 1
+                }
+            };
+
+            // Envia o comando via WebSocket
+            socket.send(JSON.stringify(comando));
+            
+            await sleep(1000);
+
+            await resetCurrentJob();
+        } else {
+            console.log('Aguardando conexão WebSocket...');
+        }
+    }
+    
+    function initConnection(ip) {
+        socket = new WebSocket(`ws://${ip}:9999`);
+
+        socket.addEventListener('open', function (event) {
+            console.log('Conectado ao WebSocket!');
+            isSocketOpen = true; // Marca que a conexão foi aberta
+        });
+
+        socket.addEventListener('message', function (event) {
+            if(printer_progress.dataset.cur_job_id != "" && JSON.parse(event.data).printProgress == 100){
+                finishCurrentJobs();
+            }
+
+            showProgress(event.dataa);
+        });
+
+        socket.addEventListener('close', function (event) {
+            window.location.replace("/printers")
+            console.log('Conexão com o WebSocket foi fechada.');
+            isSocketOpen = false; // Marca que a conexão foi fechada
+        });
+
+        socket.addEventListener('error', function (event) {
+            console.error('Erro no WebSocket:', event);
+        });
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    function showProgress(data) {
+        const { printJobTime, printLeftTime } = JSON.parse(event.data);
+
+        if (typeof printJobTime === 'number' && typeof printLeftTime === 'number') {
+            const totalTime = printJobTime + printLeftTime;
+            const progress = (printJobTime / totalTime) * 100;
+
+            if (isNaN(progress)) return;
+
+            console.log(progress)
+            console.log(printLeftTime)
+
+            printer_progress.innerHTML = `<h2>${progress.toFixed(2)}% - ${formatTimeSeconds(printLeftTime)}</h2>`
+
+            if(printLeftTime < 1){
+                finishCurrentJobs();
+            }
+        }
+    }
+
+    async function togglePrinter() {
+        await fetchInfo(`/api/v1/printers/${printer_id}/toggle`);
+        window.location.reload();
+    }
+
+    async function resetCurrentJob() {
+        await fetchInfo(`/api/v1/printers/${printer_id}/reset_job`);
+        await main();
+    }
+
+    async function resetPrinterJob() {
+        await fetchInfo(`/api/v1/printers/${printer_id}/reset_printer`);
+        printerStop();
+        await main();
+    }
+
+    async function finishCurrentJobs() {
+        if(printer_progress.dataset.cur_job_id == "") return;
+
+        let cur_data = await fetchInfo(`/api/v1/jobs/${printer_progress.dataset.cur_job_id}`);
+
+        if(cur_data.data.status_id == 2){
+            console.log("FINISH FINISH FINISH FINISH FINISH FINISH FINISH FINISH FINISH FINISH FINISH FINISH FINISH")
+            await fetchInfo(`/api/v1/printers/${printer_id}/job_done`);
+            await main();
+        }
+    }
+
+    async function concludeCurrentJobs(){
+
+        if(printer_progress.dataset.cur_job_id == "") return;
+
+        let cur_data = await fetchInfo(`/api/v1/jobs/${printer_progress.dataset.cur_job_id}`);
+
+        if(cur_data.data.status_id == 3){
+            await fetchInfo(`/api/v1/printers/${printer_id}/job_conclude`);
+            await main();
+        }
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    function sleep(ms) {
+	    return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function formatTimeSeconds(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainingSeconds = seconds % 60;
+
+        let result = "";
+
+        if (hours > 0) {
+            result += `${hours}h `;
+        }
+
+        if (minutes > 0 || hours > 0) { // Include minutes if there are hours or minutes
+            result += `${minutes}m `;
+        }
+
+        result += `${remainingSeconds}s`;
+
+        return result;
+    }
+
+    function formatTime(time) {
+        const [hours, minutes, seconds] = time.split(':').map(Number);
+
+        const parts = [];
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        if (seconds > 0) parts.push(`${seconds}s`);
+
+        return parts.join(' ') || '0s';
+    }
+
+    </script>
+</body>
+</html>

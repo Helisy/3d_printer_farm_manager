@@ -16,10 +16,24 @@ primary key(id)
 CREATE TABLE printers(
 id BIGINT NOT NULL AUTO_INCREMENT,
 
-printer_brand_id int not null,
+printer_model_id int not null,
+
+printer_status_id int default 1,
 label varchar(32) not null,
 z_displacement real not null,
 is_active boolean default true, 
+
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+deleted_at DATETIME DEFAULT NULL,
+primary key(id)
+);
+
+CREATE TABLE printer_models(
+id BIGINT NOT NULL AUTO_INCREMENT,
+
+printer_brand_id int not null,
+label VARCHAR(255) NOT NULL,
 
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -135,12 +149,13 @@ primary key(id)
 CREATE TABLE products(
 id BIGINT NOT NULL AUTO_INCREMENT,
 
-printer_brand_id int not null,
+printer_model_id int not null,
 filament_brand_id int not null,
 filament_material_id int not null,
+file_id int,
+image_path varchar(255),
 sku varchar(32) not null,
-file_address varchar(255) not null,
-included_items  varchar(255) not null,
+included_items text not null,
 print_time time not null,
 weight_gross real not null,
 weight_net real not null,
@@ -155,14 +170,9 @@ primary key(id)
 CREATE TABLE jobs(
 id BIGINT NOT NULL AUTO_INCREMENT,
 
-filaments_id int not null,
+printer_id int not null,
 product_id int not null,
 status_id int not null default 1,
-priority int not null default 0,
-marketplace varchar(32) not null,
-auto_id int not null,
-aton_sku varchar(32) not null,
-
 
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -193,10 +203,48 @@ deleted_at DATETIME DEFAULT NULL,
 primary key(id)
 );
 
-insert into job_status(label) values("Aberto");
-insert into job_status(label) values("Em separação");
 insert into job_status(label) values("Aguardando impressão");
 insert into job_status(label) values("Em impressão");
 insert into job_status(label) values("Impressão Concluída");
 insert into job_status(label) values("Concluído");
+insert into job_status(label) values("Cancelado");
 
+CREATE TABLE files(
+id BIGINT NOT NULL AUTO_INCREMENT,
+
+type varchar(32) not null,
+path varchar(255) not null,
+
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+deleted_at DATETIME DEFAULT NULL,
+primary key(id)
+);
+
+CREATE TABLE printer_status(
+id BIGINT NOT NULL AUTO_INCREMENT,
+
+label varchar(32) not null,
+
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+deleted_at DATETIME DEFAULT NULL,
+primary key(id)
+);
+
+CREATE TABLE tickets(
+id BIGINT NOT NULL AUTO_INCREMENT,
+
+printer_id int not null,
+is_closed boolean default 0,
+description text,
+
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+closed_at DATETIME DEFAULT NULL,
+deleted_at DATETIME DEFAULT NULL,
+primary key(id)
+);
+
+insert into printer_status(label) values("Ociosa");
+insert into printer_status(label) values("Em Impressão");

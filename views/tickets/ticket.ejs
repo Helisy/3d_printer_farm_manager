@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressora</title>
+    <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
+    <script src="/public/scripts/http_helper.js"></script>
+    <script src="/public/scripts/get_user.js"></script>
+    <script src="/public/scripts/notifications.js" defer></script>
+    <script src="/public/scripts/inputs.js" defer></script>
+    <script src="/public/scripts/tab_switch.js" defer></script>
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/side_tab.css">
+    <link rel="stylesheet" href="/public/styles/buttons.css">
+    <link rel="stylesheet" href="/public/styles/structure_cards.css">
+    <link rel="stylesheet" href="/public/styles/grid_table.css">
+    <link rel="stylesheet" href="/public/styles/info_card.css">
+    <link rel="stylesheet" href="/public/styles/inputs.css">
+    <link rel="stylesheet" href="/public/styles/select.css">
+
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div>
+            <i class="fa-solid fa-check"></i>
+            <div>
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="hover-container">        
+        <div class="ifc-loading" id="loading_spinner">
+            <div class="lds-dual-ring"></div>
+            <label for="">Aguarde...</label>
+        </div>
+        <div class="info-card w35" id="link_filament">
+            <div class="ifc-header">
+                <h3>Vincular Filamento</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <select class="select" id="filament_select"></select>
+                <div class="inpt">
+                    <span>Peso Rolo (Gramas)</span>
+                    <input type="number" id="filament_weigth">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="linkFilament()">Vincular</button>
+            </div>
+        </div>
+        <div class="info-card w35" id="create_job">
+            <div class="ifc-header">
+                <h3>Criar Trabalho</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <div class="inpt">
+                    <input placeholder="Insira sku do produto" id="product_input" type="text">
+                </div>
+                    <div class="tb-container" style="max-height: 50vh;">
+                        <table class="tb-table">
+                            <thead>
+                                <tr>
+                                    <th width="1"><i class="fa-solid fa-location-arrow"></i></th>
+                                    <th>Sku</th>
+                                    <th>Peso Bruto</th>
+                                    <th>Quantidade</th>
+                                    <th>Tempo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product_tb_res">
+                                <!-- <tr>
+                                    <td><input type="checkbox" name="" id=""></td>
+                                    <td>TD0045</td>
+                                    <td>55g</td>
+                                    <td>1</td>
+                                    <td>15m 5s</td>
+                                </tr> -->
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="selectProduct()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="side-nav close" id="side_nav">
+            <div class="option close switch" id="tab_sw" href="">
+                <i class="fa-solid fa-bars"></i>
+                <span>3D System</span>
+            </div>
+            <!-- <a class="option close" href="/jobs" id="jobs">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Pedidos</span>
+            </a>
+            <a class="option close" href="">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Separação</span>
+            </a> -->
+            <a class="option close" href="/printers" id="printers">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>Impressoras</span>
+            </a>
+            <a class="option close" href="/products" id="products">
+                <i class="fa-solid fa-cube"></i>
+                <span>Produtos</span>
+            </a>
+            <a class="option close" href="/tickets" id="tickets">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Manutenção</span>
+            </a>
+            <a class="option close" href="/users" id="users">
+                <i class="fa-solid fa-users"></i>
+                <span>Usuários</span>
+            </a>
+            <a class="option close" href="/config" id="config">
+                <i class="fa-solid fa-gear"></i>
+                <span>Configurações</span>
+            </a>
+        </div>
+        <div class="container">
+            <div class="content flex col" id="title">
+                <div class="struct-card row align-center space-between">
+                    <div class="flex align-center gap-1">
+                        <i class="fa-solid fa-user ct-user" id="user_icon"></i>    
+                        <h3 id="user_name"></h3>
+                    </div>
+                    <div>
+                        <button class="btn basic" onclick="logout()">Sair</button>
+                    </div>
+                </div>
+                <div class="struct-card row align-center space-between" id="printer_title">
+                    <!-- <div class="flex align-center">
+                        <h2>#1 - K1 MAX</h2>
+                        <span style="color: var(--primary_darker);">ATIVA</span>
+                    </div> -->
+                </div>
+            </div>
+            <div class="content flex align-start" id="ct_1">
+                <div class="struct-card over_h">
+                   <textarea class="textarea" style="height: 60vh" id="text_info">
+
+                   </textarea>
+                </div>
+                <div class="struct-card w35" id="ticket_info_holder">
+                    <!-- <span class="lb-title">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                        <span>Ticket #1</span>
+                    </span>
+                    <div class="flex align-start">
+                        <div class="btn primary">Concluir Ticket</div>
+                    </div>
+                    <p class="flex space-between"></p>
+                    <p class="flex space-between"></p>
+                    <p class="flex space-between"></p>
+                    <div class="flex align-start">
+                        <div class="btn primary">Salvar</div>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    function setUser(){
+        const user = JSON.parse(localStorage.getItem("user"));
+        const user_name = document.querySelector("#user_name");
+
+        user_name.innerHTML = user.firstName;
+        const viewportWidth = window.innerWidth;
+
+        document.querySelector("#user_icon").classList.value = user.role == "admin" ? "fa-solid fa-crown ct-user" : "fa-solid fa-user ct-user";
+        
+        if(viewportWidth < 600){
+            user_name.style.fontSize = "1rem";
+        }
+    }
+    setUser();
+
+    function updateScreenSize() {
+        const viewportWidth = window.innerWidth;
+        const ct_1 = document.querySelector("#ct_1");
+
+        const isMobile = viewportWidth < 600;
+
+        ct_1.classList.toggle("col-rev", isMobile);
+        ticket_info_holder.classList.toggle("w35", !isMobile);
+    }
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+
+    
+
+
+
+
+    const hover_elements = 
+    {
+        loading_spinner: document.querySelector("#loading_spinner"),
+    }
+
+    const hover_container = document.querySelector(".hover-container");
+    hover_container.style.display = "none";
+
+    function toggleHoverContainer(el_id){
+        if(hover_container.style.display == "none"){
+            hover_container.style.display = "flex";
+
+            for (const [key, value] of Object.entries(hover_elements)) {
+            
+                if(key == el_id){
+                    value.style.display = "flex";
+                    continue;
+                }
+
+                value.style.display = "none";
+            }
+            
+        }else{
+            hover_container.style.display = "none";
+        }
+    }
+
+    const params = window.location.pathname.split("/");
+    const ticket_id = params[2];
+
+    const printer_title = document.querySelector("#printer_title");
+
+    const text_info = document.querySelector("#text_info");
+
+    async function main() {
+
+        let ticket_data = await fetchInfo(`/api/v1/tickets/${ticket_id}`);
+        ticket_data = ticket_data.data;
+
+        let printer_data = await fetchInfo(`/api/v1/printers/${ticket_data.printer_id}`);
+        printer_data = printer_data.data[0];
+
+        printer_title.innerHTML = 
+        `
+            <div class="flex align-center">
+                <h2>#${printer_data.id} - ${printer_data.label}</h2>
+                <span style="color: var(--primary_darker);">${printer_data.is_active == 1 ? "ATIVA" : "INATIVA"}</span>
+            </div>
+        `;
+
+        printer_title.dataset.printer_brand_id = printer_data.printer_brand_id;
+
+        text_info.value = ticket_data.description;
+        if(ticket_data.is_closed == 1){
+           text_info.disabled = true;
+        }
+
+        ticket_info_holder.innerHTML = 
+        `
+            <span class="lb-title">
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+                <span>Ticket #${ticket_data.id}</span>
+            </span>
+            ${
+                ticket_data.is_closed == 0 ? 
+                `
+                    <div class="flex align-start">
+                        <div class="btn primary" onclick="concludeTicket()">Concluir Ticket</div>
+                    </div>
+                `
+                : ""
+            }
+            <div>
+                <p class="flex space-between"><b>Criado em:</b>${corDate(ticket_data.created_at)}</p>
+                <p class="flex space-between"><b>Ultima atualização:</b>${corDate(ticket_data.updated_at)}</p>
+                <p class="flex space-between"><b>Concluído em:</b>${corDate(ticket_data.closed_at)}</p>
+            </div>
+            ${
+                ticket_data.is_closed == 0 ? 
+                `
+                    <div class="flex align-start">
+                        <div class="btn primary" onclick="editTicket()">Salvar</div>
+                    </div>
+                `
+                : ""
+            }
+        `;
+    }
+
+    main();
+
+
+    async function createTicket() {
+        let response = await postData(`/api/v1/tickets`, "post", {
+            printer_id: sel_printer.value,
+        });
+
+        switch (response.code) {
+            case 201:
+                window.location.replace(`/tickets/${response.data.id}`);
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+    async function editTicket() {
+        let response = await postData(`/api/v1/tickets/${ticket_id}`, "put", {
+            description: text_info.value,
+        });
+
+        switch (response.code) {
+            case 200:
+                toggleHoverContainer("loading_spinner");
+                await main();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+    async function concludeTicket() {
+        let response = await postData(`/api/v1/tickets/${ticket_id}/conclude`, "put", {});
+
+        switch (response.code) {
+            case 200:
+                toggleHoverContainer("loading_spinner");
+                await main();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+    
+    function corDate(date){
+        if(!date) return "";
+
+        date = new Date(date)
+
+        date.setHours(date.getHours() - 3, date.getMinutes(), date.getSeconds())
+
+        date = date.toISOString();
+
+        var newDate = date.split(".")[0]
+        newDate = newDate.split("T");
+
+        var day = newDate[0].split("-")
+        return `${day[2]}/${day[1]}/${day[0]} ${newDate[1]}`;
+    }
+
+    function formatTime(time) {
+        const [hours, minutes, seconds] = time.split(':').map(Number);
+
+        const parts = [];
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        if (seconds > 0) parts.push(`${seconds}s`);
+
+        return parts.join(' ') || '0s';
+    }
+
+    </script>
+</body>
+</html>

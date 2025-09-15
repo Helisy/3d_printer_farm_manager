@@ -1,0 +1,12 @@
+.select
+{
+    border: 1px solid var(--spacer);
+    padding: .5rem;
+    border-radius: .5rem;
+    transition: .1s ease;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+}
+

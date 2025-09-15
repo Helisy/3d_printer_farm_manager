@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
+    <script src="/public/scripts/http_helper.js"></script>
+    <script src="/public/scripts/get_user.js"></script>
+    <script src="/public/scripts/notifications.js" defer></script>
+    <script src="/public/scripts/inputs.js" defer></script>
+    <script src="/public/scripts/tab_switch.js" defer></script>
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/side_tab.css">
+    <link rel="stylesheet" href="/public/styles/buttons.css">
+    <link rel="stylesheet" href="/public/styles/structure_cards.css">
+    <link rel="stylesheet" href="/public/styles/grid_table.css">
+    <link rel="stylesheet" href="/public/styles/info_card.css">
+    <link rel="stylesheet" href="/public/styles/inputs.css">
+    <link rel="stylesheet" href="/public/styles/select.css">
+
+    <style>
+        .ct-bt-ic
+        {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .5rem;
+        }
+
+        .ct-bt-ic > i 
+        {
+            font-size: 1.1rem;
+            color: var(--success_darker);
+            cursor: pointer;
+        }
+
+        .ct-model
+        {
+            font-size: .8rem;
+
+        }
+
+        .ct-filament
+        {
+            padding: .5rem;
+            display: flex;
+            border: 2px solid var(--primary);
+            border-radius: .5rem;
+            align-items: center ;
+        }
+
+        .ct-filament > i
+        {
+            padding-right: .5rem;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div>
+            <i class="fa-solid fa-check"></i>
+            <div>
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="hover-container">        
+        <div class="ifc-loading" id="loading_spinner">
+            <div class="lds-dual-ring"></div>
+            <label for="">Aguarde...</label>
+        </div>
+        <div class="info-card w35" id="ifc_create_printer">
+            <div class="ifc-header">
+                <h3>Adicionar Nova Impressora</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <select class="select" id="sel_model"></select>
+                <div class="inpt">
+                    <span>Nome Da Impressora</span>
+                    <input type="text" id="inpt_printer_name">
+                </div>
+                <p style="font-size: .8rem;background-color: var(--danger_light); padding: .5rem; border-radius: .5rem">Certifique-se de que o valor de deslocamento esteja correto para evitar danos à impressora.</p>
+                <div class="inpt">
+                    <span>Deslocamento Z</span>
+                    <input type="number" id="inpt_z_offset">
+                </div>
+                <div class="spacer horizontal" style="margin: 0;"></div>
+                <div class="flex col gap-1" id="connect_inpts">
+                    
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="createPrinter(this)">Criar</button>
+            </div>
+        </div>
+        <div class="info-card w35" id="ifc_edit_ofset">
+            <div class="ifc-header">
+                <h3>Editar Deslocamento</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <p style="font-size: .8rem;background-color: var(--danger_light); padding: .5rem; border-radius: .5rem">Certifique-se de que o valor de deslocamento esteja correto para evitar danos à impressora.</p>
+                <div class="inpt">
+                    <span>Deslocamento Z</span>
+                    <input type="number" id="inpt_edit_z_offset">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="editPrinter()">Salvar</button>
+            </div>
+        </div>
+        <div class="info-card w35" id="ifc_edit_name">
+            <div class="ifc-header">
+                <h3>Editar Nome</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <p style="font-size: .8rem;background-color: var(--danger_light); padding: .5rem; border-radius: .5rem">Certifique-se de que o valor de deslocamento esteja correto para evitar danos à impressora.</p>
+                <div class="inpt">
+                    <span>Nome Da Impressora</span>
+                    <input type="text" id="inpt_edit_name">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="editName()">Salvar</button>
+            </div>
+        </div>
+        <div class="info-card w35" id="ifc_edit_ip">
+            <div class="ifc-header">
+                <h3>Atualizar Conexão</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body" id="edit_con_holder">
+                <!-- <p style="font-size: .8rem;background-color: var(--danger_light); padding: .5rem; border-radius: .5rem">Certifique-se de que o valor de deslocamento esteja correto para evitar danos à impressora.</p>
+                <div class="inpt">
+                    <span>Nome Da Impressora</span>
+                    <input type="text" id="inpt_edit_ip">
+                </div> -->
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="editConection(this)">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="side-nav close" id="side_nav">
+            <div class="option close switch" id="tab_sw" href="">
+                <i class="fa-solid fa-bars"></i>
+                <span>3D System</span>
+            </div>
+            <!-- <a class="option close" href="/jobs" id="jobs">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Pedidos</span>
+            </a>
+            <a class="option close" href="">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Separação</span>
+            </a> -->
+            <a class="option close" href="/printers" id="printers">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>Impressoras</span>
+            </a>
+            <a class="option close" href="/products" id="products">
+                <i class="fa-solid fa-cube"></i>
+                <span>Produtos</span>
+            </a>
+            <a class="option close" href="/tickets" id="tickets">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Manutenção</span>
+            </a>
+            <a class="option close" href="/users" id="users">
+                <i class="fa-solid fa-users"></i>
+                <span>Usuários</span>
+            </a>
+            <a class="option close" href="/config" id="config">
+                <i class="fa-solid fa-gear"></i>
+                <span>Configurações</span>
+            </a>
+        </div>
+        <div class="container">
+            <div class="content flex col" id="title">
+                <div class="struct-card row align-center space-between">
+                    <div class="flex align-center gap-1">
+                        <i class="fa-solid fa-user ct-user" id="user_icon"></i>    
+                        <h3 id="user_name"></h3>
+                    </div>
+                    <div>
+                        <button class="btn basic" onclick="logout()">Sair</button>
+                    </div>
+                </div>
+                <div class="struct-card row align-center space-between">
+                    <div>
+                        <button class="btn tab-switch basic" onclick="switchTabs(this)" data-show="true" data-tab-id="1">Ativas</button>
+                        <button class="btn tab-switch basic" onclick="switchTabs(this)" data-show="false" data-tab-id="2">Inativas</button>
+                    </div>
+                    <div>
+                        <div class="btn primary" onclick="loadCreatePrinterIFC()">Adicionar</div>
+                    </div>
+                </div>
+            </div>
+            <div class="content tab grid c4" id="ct_1" data-tab-id="1" data-display="">
+                <!-- <a href="#" class="struct-card col space-between">
+                    <div>
+                        <div class=" flex align-center">
+                            <i class="fa-solid fa-circle" style="font-size: .75rem; color: var(--primary);"></i>
+                            <span>Work In Progress</span>
+                        </div>
+                        <div>
+                            <h2>#1 K1 Max</h2>
+                            <span class="ct-model">K1 Max - Creality</span>
+                        </div>
+                    </div>
+                    <div class="flex space-between">
+                        <div class="pd-p5 bd-p5 flex align-center" style="border: 2px solid var(--primary);">
+                            <i class="fa-solid fa-coins" style="font-size: 1rem; color: var(--spacer);"></i>
+                            <div class="flex" style="color: var(--spacer);">
+                                <span>Voolt | PLA | Preto</span>
+                            </div>
+                        </div>
+                        <div class="ct-bt-ic">
+                            <i class="fa-solid fa-arrows-down-to-line"></i>
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                    </div>
+                </a> -->
+            </div>
+            <div class="content tab grid c4" id="ct_2" data-tab-id="2" data-display="">
+            </div>
+        </div>
+    </div>
+    <script>
+    function setUser(){
+        const user = JSON.parse(localStorage.getItem("user"));
+        const user_name = document.querySelector("#user_name");
+
+        user_name.innerHTML = user.firstName;
+        const viewportWidth = window.innerWidth;
+
+        document.querySelector("#user_icon").classList.value = user.role == "admin" ? "fa-solid fa-crown ct-user" : "fa-solid fa-user ct-user";
+        
+        if(viewportWidth < 600){
+            user_name.style.fontSize = "1rem";
+        }
+    }
+    setUser();
+
+    function updateScreenSize() {
+        const viewportWidth = window.innerWidth;
+        const ct_1 = document.querySelector("#ct_1");
+
+        const isMobile = viewportWidth < 600;
+
+        ct_1.classList.toggle("c1", isMobile);
+        ct_1.classList.toggle("c4", !isMobile);
+    }
+
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+
+    
+    async function switchTabs(e)
+    {
+        if(e.dataset.show === "true") return;
+
+        if(!!e.dataset.function){
+            await tabFunction[e.dataset.function]()
+        }
+
+        e.classList.add("selected")
+        e.dataset.show = "true"
+        e.scrollIntoView();
+
+        document.querySelectorAll(".btn.tab-switch").forEach(el => {
+            if(el.dataset.tabId != e.dataset.tabId ){
+                el.classList.remove("selected")
+                el.dataset.show = "false"
+            }
+        })
+
+        document.querySelectorAll(".content.tab").forEach(el => {
+            if(el.dataset.tabId != e.dataset.tabId ){
+                el.style.display = "none"
+            }else{
+                console.log()
+                el.style.display = el.dataset.display;
+            }
+        })
+    }
+
+    function defineTabs(){
+        let tab_id;
+
+        document.querySelectorAll(".btn.tab-switch").forEach(el => {
+            if(el.dataset.show === "true" ){
+                el.classList.add("selected")
+                tab_id = el.dataset.tabId;
+            }else{
+                el.classList.remove("selected")
+                el.dataset.show = "false"
+            }
+        })
+
+        document.querySelectorAll(".content.tab").forEach(el => {
+            if(el.dataset.tabId != tab_id ){
+                el.style.display = "none"
+            }else{
+                el.style.display = el.dataset.display;
+            }
+        })
+    }
+
+    defineTabs()
+
+
+
+    const hover_elements = 
+    {
+        loading_spinner: document.querySelector("#loading_spinner"),
+        ifc_create_printer: document.querySelector("#ifc_create_printer"),
+        ifc_edit_ofset: document.querySelector("#ifc_edit_ofset"),
+        ifc_edit_name: document.querySelector("#ifc_edit_name"),
+        ifc_edit_ip: document.querySelector("#ifc_edit_ip"),
+    }
+
+    const hover_container = document.querySelector(".hover-container");
+    hover_container.style.display = "none";
+
+    function toggleHoverContainer(el_id){
+        if(hover_container.style.display == "none"){
+            hover_container.style.display = "flex";
+
+            for (const [key, value] of Object.entries(hover_elements)) {
+            
+                if(key == el_id){
+                    value.style.display = "flex";
+                    continue;
+                }
+
+                value.style.display = "none";
+            }
+            
+        }else{
+            hover_container.style.display = "none";
+        }
+    }
+
+
+    const ct_1 = document.querySelector("#ct_1");
+    const ct_2 = document.querySelector("#ct_2");
+    
+    const sel_model = document.querySelector("#sel_model");
+    const connect_inpts = document.querySelector("#connect_inpts");
+
+    const inpt_printer_name = document.querySelector("#inpt_printer_name");
+    const inpt_z_offset = document.querySelector("#inpt_z_offset");
+
+    const inpt_edit_z_offset = document.querySelector("#inpt_edit_z_offset");
+
+    const inpt_edit_name = document.querySelector("#inpt_edit_name");
+
+    const edit_con_holder = document.querySelector("#edit_con_holder");
+
+    async function main(params) {
+        toggleHoverContainer("loading_spinner")
+
+        let printers = await fetchInfo(`/api/v1/printers`);
+        printers = printers.data;
+        
+        let active_html = "";
+        let inactive_html = "";
+
+        for (const printer of printers) {
+
+            let cur_filament = await fetchInfo(`/api/v1/printers/filaments/current?printer_id=${printer.id}`);
+            cur_filament = cur_filament.data[0] || [];
+
+            let html = 
+            `
+                <div class="struct-card col space-between">
+                    <a href="/printers/${printer.id}" class="a-no-dec">
+                        <div class=" flex align-center">
+                            <i class="fa-solid fa-circle" style="font-size: .75rem; color: var(${printer.is_active == 1 ? "--primary" : "--warning"});"></i>
+                            <span>${printer.is_active == 1 ? printer.printer_status : "Inativa"}</span>
+                        </div>
+                        <div>
+                            <h2>#${printer.id} ${printer.label}</h2>
+                            <span class="ct-model">${printer.printer_model_label} - ${printer.printer_brand_label} | <b>Z-offset: ${printer.z_displacement.toString().replace(".", ",")}</b></span>
+                        </div>
+                    </a>
+                    <div class="flex space-between">
+                        <div class="ct-filament">
+                            <i class="fa-solid fa-coins" style="font-size: 1rem; color: var(--spacer);"></i>
+                            <div class="flex" style="color: var(--spacer);">
+                            ${cur_filament.length < 1 ? "<span>Sem Filamento</span>" : `<span>${cur_filament.filament.filament_brands_name} | ${cur_filament.filament.material_name} | ${cur_filament.filament.color}</span>`}
+                            </div>
+                        </div>
+                        <div class="ct-bt-ic">
+                            <i class="fa-solid fa-wifi" onclick="loadEditConectionIFC(${printer.id})"></i>
+                            <i class="fa-solid fa-pen" onclick="editEditIFC(${printer.id})"></i>
+                            <i class="fa-solid fa-arrows-down-to-line" onclick="editPrinterIFC(${printer.id})"></i>
+                            <i class="fa-solid fa-camera" onclick="window.open('http://${printer.connection["IP"].value}:8080/javascript_simple.html')"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if(printer.is_active == 1){
+                
+                active_html += html;
+            }else{
+                inactive_html += html;
+            }
+        }
+
+        ct_1.innerHTML = active_html;
+        ct_2.innerHTML = inactive_html;
+
+        toggleHoverContainer();
+    }
+
+    main();
+
+    async function loadCreatePrinterIFC() {
+        let printer_models = await fetchInfo(`/api/v1/printers/models`);
+        printer_models = printer_models.data;     
+        
+        let sel_html = `<option value="">Selecione um modelo</option>`;
+
+        for (const model of printer_models) {
+            sel_html += `<option value="${model.id}-${model.printer_brand_id}">${model.label} - ${model.printer_brand_name}</option>`
+        }
+
+        sel_model.innerHTML = sel_html;
+
+        toggleHoverContainer("ifc_create_printer");
+    }
+
+    sel_model.addEventListener('change', async e => {
+        if(sel_model.value == ""){
+            connect_inpts.innerHTML = "";
+            return;
+        }
+
+        let html = `<p style="font-size: .8rem;background-color: var(--danger_light); padding: .5rem; border-radius: .5rem">Certifique-se de inserir as informações de conexão com a impressora corretamente. Caso contrário, o sistema não conseguirá se conectar à impressora.</p>`;
+
+        let con_types = await fetchInfo(`/api/v1/printers/connections/types?printer_brand_id=${sel_model.value.split("-")[1]}`);
+        con_types = con_types.data;     
+
+        for (const type of con_types) {
+            html += 
+            `
+                <div class="inpt">
+                    <span>${type.value}</span>
+                    <input class="con-inpt" data-value_id=${type.id} data-value_name=${type.value} type="text">
+                </div>
+            `;
+        }
+
+        connect_inpts.innerHTML = html;
+    });
+
+    async function createPrinter(e) {
+        if(sel_model.value == ""){
+            return pushNotify("error", "Selecione um modelo de impressora.");
+        }
+
+        if(inpt_printer_name.value.length < 3){
+            
+        }
+        
+        if(inpt_z_offset.value == ""){
+            inpt_z_offset.value = 0;
+        }
+
+        if(inpt_z_offset.value > 1 && inpt_z_offset.value < -1 ){
+            return pushNotify("error", "Valor inserido fora do padrão.");
+        }
+
+        e.disabled = true;
+        e.innerHTML = `<i class="fa-solid fa-spinner loading"></i> Testando Conexão`;
+
+        const con_inpts = document.querySelectorAll(".con-inpt");
+
+        const con_vl_build = [];
+        for (const element of con_inpts) {
+            if(element.value == ""){
+                e.innerHTML = `Criar`;
+                e.disabled = false;
+                return pushNotify("error", "Preencha todos o campos de conexão.");
+            }
+
+            if(element.dataset.value_name == "IP"){
+                const res = await checkAvailability(element.value);
+
+                if(!res){
+                    e.innerHTML = `Criar`;
+                    e.disabled = false;
+                    return pushNotify("error", "Não foi possivel se conectar impressora. Revise o IP.");
+                }
+            }
+
+            con_vl_build.push({
+                value_id: parseInt(element.dataset.value_id),
+                value: element.value
+            });
+        }
+
+        e.innerHTML = `Sucesso!`;
+
+        let response_1 = await postData(`/api/v1/printers`, "post", {
+            printer_model_id: sel_model.value.split("-")[0],
+            label: inpt_printer_name.value,
+            z_displacement: inpt_z_offset.value
+        });
+
+        switch (response_1.code) {
+            case 400:
+                pushNotify("error", response_1.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+
+        let response_2 = await postData(`/api/v1/printers/connections`, "post", {
+            printer_id: response_1.data.id
+        });
+
+        switch (response_2.code) {
+            case 400:
+                pushNotify("error", response_2.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+
+        // console.log(JSON.stringify({values: con_vl_build}));
+
+        let response_3 = await postData(`/api/v1/printers/connections/${response_2.data.id}/values`, "post", {
+            values: con_vl_build
+        });
+
+        switch (response_3.code) {
+            case 201:
+                window.location.reload();
+                return;
+            case 400:
+                pushNotify("error", response_3.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+    }
+
+    function editPrinterIFC(id) {
+        toggleHoverContainer("ifc_edit_ofset");
+
+        inpt_edit_z_offset.dataset.printer_id = id;
+    }
+
+    async function editPrinter() {
+        if(inpt_edit_z_offset.value > 1 && inpt_edit_z_offset.value < -1 ){
+            return pushNotify("error", "Valor inserido fora do padrão.");
+        }
+
+        if(inpt_edit_z_offset.value == "" ){
+            return pushNotify("error", "Insira um valor.");
+        }
+
+        let response = await postData(`/api/v1/printers/${inpt_edit_z_offset.dataset.printer_id}`, "put", {
+            z_displacement: inpt_edit_z_offset.value
+        });
+
+        switch (response.code) {
+            case 200:
+                inpt_edit_z_offset.value = "";
+                await main();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+
+    }
+
+    function editEditIFC(id) {
+        toggleHoverContainer("ifc_edit_name");
+
+        inpt_edit_name.dataset.printer_id = id;
+    }
+
+    async function editName() {
+        if(inpt_edit_name.value == "" ){
+            return pushNotify("error", "Insira um valor.");
+        }
+
+        let response = await postData(`/api/v1/printers/${inpt_edit_name.dataset.printer_id}`, "put", {
+            label: inpt_edit_name.value
+        });
+
+        switch (response.code) {
+            case 200:
+                inpt_edit_name.value = "";
+                await main();
+                toggleHoverContainer();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+
+    }
+
+    async function loadEditConectionIFC(printer_id) {
+        let printer = await fetchInfo(`/api/v1/printers/${printer_id}`);
+        printer = printer.data;
+
+        let html = "";
+
+        for (const element of Object.values(printer[0].connection)) {
+            html +=
+            `
+            <div class="inpt">
+                <span>${element.type}</span>
+                <input class="con-vl" type="text" data-con_vl_id="${element.connection_value_id}" data-value_name="${element.type}" data-connection_lib_id="${element.connection_lib_id}">
+            </div> 
+            `;
+        }
+                
+        edit_con_holder.innerHTML = html;
+        
+        toggleHoverContainer("ifc_edit_ip");
+    }
+
+    async function editConection(e) {
+        e.disabled = true;
+        e.innerHTML = `<i class="fa-solid fa-spinner loading"></i> Testando Conexão`;
+
+        const con_inpts = document.querySelectorAll(".con-vl");
+
+        let con_vl_build = [];
+        for (const element of con_inpts) {
+            if(element.value == ""){
+                e.innerHTML = `Salvar`;
+                e.disabled = false;
+                return pushNotify("error", "Preencha todos o campos de conexão.");
+            }
+
+            if(element.dataset.value_name == "IP"){
+                const res = await checkAvailability(element.value);
+                if(!res){
+                    e.innerHTML = `Salvar`;
+                    e.disabled = false;
+                    return pushNotify("error", "Não foi possivel se conectar impressora. Revise o IP.");
+                }
+            }
+
+            con_vl_build = {
+                connection_lib_id: element.dataset.connection_lib_id,
+                value_id: element.dataset.con_vl_id,
+                value: element.value
+            }
+        }
+
+        e.innerHTML = `Sucesso!`;
+
+        let response = await postData(`/api/v1/printers/connections/${con_vl_build.connection_lib_id}/values/${con_vl_build.value_id}`, "put", {
+            value: con_vl_build.value
+        });
+
+        switch (response.code) {
+            case 200:
+                window.location.reload();
+                return;
+            case 400:
+                pushNotify("error", response.message);
+                return;
+            case 500:
+                pushNotify("error", "Server Error");
+                return;
+        }
+
+        console.log(con_vl_build)
+    }
+
+
+    async function checkAvailability(ip) {
+        const url = `http://${ip}/static/img/mylogo.dff7f1ec.png`;
+
+        try {
+            const response = await fetch(url, { method: 'HEAD' });
+
+            if (response.ok) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            return false;
+        }
+    }
+
+    </script>
+</body>
+</html>
