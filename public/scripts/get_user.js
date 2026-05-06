@@ -5,6 +5,7 @@ async function getUser() {
         localStorage.setItem("user", JSON.stringify(current_user.data));
     }else{
         localStorage.removeItem("user");
+        window.location.replace("/")
     }
 }
 

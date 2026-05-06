@@ -6,7 +6,6 @@
     <title>Produtos</title>
     <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
     <script src="/public/scripts/http_helper.js"></script>
-    <script src="/public/scripts/get_user.js"></script>
     <script src="/public/scripts/notifications.js" defer></script>
     <script src="/public/scripts/inputs.js" defer></script>
     <script src="/public/scripts/tab_switch.js" defer></script>
@@ -109,6 +108,17 @@
         login()
       }
     });
+
+    async function getUser() {
+        let current_user = await fetchInfo("/api/v1/users/current");
+    
+        if(current_user.code == 200){
+            localStorage.setItem("user", JSON.stringify(current_user.data));
+        }else{
+            localStorage.removeItem("user");
+            window.location.replace("/")
+        }
+    }
     
     </script>
 </body>
