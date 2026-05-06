@@ -91,8 +91,7 @@ deleted_at DATETIME DEFAULT NULL,
 primary key(id)
 );
 
-insert into connection_types(label, value) values("Creality");
-insert into connection_types(label) values("Bamboo Lab");
+INSERT INTO connection_types (printer_brand_id, value) VALUES ('1', 'IP');
 
 CREATE TABLE materials(
 id BIGINT NOT NULL AUTO_INCREMENT,

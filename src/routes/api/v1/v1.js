@@ -36,5 +36,8 @@ router.use("/products", productsRouter);
 const ticketsRouter = require('./tickets');
 router.use("/tickets", ticketsRouter);
 
+const BaseStockRouter = require('./base-stock');
+router.use("/base-stock", BaseStockRouter);
+
 
 module.exports = router;

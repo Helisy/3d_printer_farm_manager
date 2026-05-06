@@ -36,8 +36,7 @@ app.use("/config", require('./src/routes/config'));
 app.use("/auth", require('./src/routes/auth'));
 app.use("/users", require('./src/routes/users'));
 app.use("/tickets", require('./src/routes/tickets'));
-
-
+app.use("/base-stock", require('./src/routes/base-stock'));
 
 /***/
 

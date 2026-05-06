@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque</title>
+    <script src="https://kit.fontawesome.com/2f7352ec62.js" crossorigin="anonymous"></script>
+    <script src="/public/scripts/http_helper.js"></script>
+    <script src="/public/scripts/get_user.js"></script>
+    <script src="/public/scripts/notifications.js" defer></script>
+    <script src="/public/scripts/inputs.js" defer></script>
+    <!-- <script src="/public/scripts/tab_switch.js" defer></script> -->
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+    <link rel="stylesheet" href="/public/styles/side_tab.css">
+    <link rel="stylesheet" href="/public/styles/buttons.css">
+    <link rel="stylesheet" href="/public/styles/structure_cards.css">
+    <link rel="stylesheet" href="/public/styles/grid_table.css">
+    <link rel="stylesheet" href="/public/styles/info_card.css">
+    <link rel="stylesheet" href="/public/styles/inputs.css">
+    <link rel="stylesheet" href="/public/styles/select.css">
+
+    <style>
+        .info-display
+        {
+            display:  flex;
+            flex-direction: column;
+            gap: .25rem;
+            width: 12rem;
+        }
+
+        .info-display > span:nth-child(1) 
+        {
+            font-size: .8rem;
+            font-weight: 800;
+            color: var(--primary_darker);
+        }
+
+        .custom-1 
+        {
+            display: flex;
+        }
+
+        .custom-1 > button 
+        {
+            padding: .6rem 1.5rem;
+            border: none;
+            height: 100%;
+        }
+
+        .custom-1 > button > i 
+        {
+            margin-right: .5rem;
+        }
+
+        .custom-1 > button:nth-child(1)
+        {
+ 
+            border-radius: 10rem 0 0 10rem;          
+            background-color: white;
+            border: 1px solid var(--spacer);
+            font-weight: 600;
+        }
+
+        .custom-1 > button:nth-child(2)
+        {
+            border-radius: 0 10rem 10rem 0;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .custom-1 > button:active
+        {
+            background-color: var(--primary_darker);
+            color: white;
+        }
+
+
+        .custom-2
+        {
+            display: flex;
+        }
+        
+        .custom-2 button 
+        {
+            width: 2.5rem;
+            padding: 0 .25rem;
+            border: none;
+            outline: none;
+            border-top: 1px solid var(--spacer);
+            border-bottom: 1px solid var(--spacer);
+            background-color: white;
+            transition: .1s ease;
+            position: relative;
+        }
+
+        .custom-2 > button:nth-child(1)
+        {
+            border-radius: 10rem 0 0 10rem;
+            border-left: 1px solid var(--spacer);
+            
+        }
+
+        .custom-2 > button:nth-child(5)
+        {
+            width: auto;
+            padding: 0 .5rem;
+            background-color: var(--primary_light);
+            color: var(--primary_darker);
+        }
+
+        .custom-2 button::after
+        {
+            content: "";
+            height: .75rem;
+            width: 1px;
+            background-color: var(--spacer);
+            position: absolute;
+            right: 0;
+            top: 0;
+            transform: translateY(100%);
+        }
+
+        .custom-2 > button:nth-child(4)::after, .custom-2 > button:nth-child(5):after{
+            background-color: transparent;
+        }   
+
+        .custom-2 button:active
+        {
+            background-color: var(--primary_darker);
+            color: white;
+        }
+
+        .custom-2 input 
+        {
+            border-top: 1px solid var(--spacer);
+            border-bottom: 1px solid var(--spacer);
+            border-right: 1px solid var(--spacer);
+            border-left: 0;
+            border-radius: 0 10rem 10rem 0;
+            font-size: 1.5rem;
+            width: 8rem;
+            text-align: center;
+            background-color: var(--background);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div>
+            <i class="fa-solid fa-check"></i>
+            <div>
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="hover-container">        
+        <div class="ifc-loading" id="loading_spinner">
+            <div class="lds-dual-ring"></div>
+            <label for="">Aguarde...</label>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="side-nav close" id="side_nav">
+            <div class="option close switch" id="tab_sw" href="">
+                <i class="fa-solid fa-bars"></i>
+                <span>3D System</span>
+            </div>
+            <!-- <a class="option close" href="/jobs" id="jobs">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Pedidos</span>
+            </a>
+            <a class="option close" href="">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Separação</span>
+            </a> -->
+            <a class="option close" href="/printers" id="printers">
+                <i class="fa-solid fa-kaaba"></i>
+                <span>Impressoras</span>
+            </a>
+            <a class="option close" href="/products" id="products">
+                <i class="fa-solid fa-cube"></i>
+                <span>Produtos</span>
+            </a>
+            <a class="option close" href="/base-stock" id="base-stock">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span>Estoque Base</span>
+            </a>
+            <a class="option close" href="/tickets" id="tickets">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Manutenção</span>
+            </a>
+            <a class="option close" href="/users" id="users">
+                <i class="fa-solid fa-users"></i>
+                <span>Usuários</span>
+            </a>
+            <a class="option close" href="/config" id="config">
+                <i class="fa-solid fa-gear"></i>
+                <span>Configurações</span>
+            </a>
+        </div>
+        <div class="container">
+            <div class="content flex col" id="title">
+                <div class="struct-card row align-center space-between">
+                    <div class="flex align-center gap-1">
+                        <i class="fa-solid fa-user ct-user" id="user_icon"></i>    
+                        <h3 id="user_name"></h3>
+                    </div>
+                    <div>
+                        <button class="btn basic" onclick="logout()">Sair</button>
+                    </div>
+                </div>
+
+                 <div class="struct-card row align-center">
+                   <a class="flex align-center" style="text-decoration: none;" href="/base-stock">
+                     <i class="fa-solid fa-arrow-left" style="color: var(--primary_darker); font-size: 1.5rem;"></i>
+                    <span style="color: var(--primary_darker); font-weight: 500;">Voltar</span>
+                   </a>
+                 </div>
+            </div>
+            <div class="content flex col">
+                <div class="struct-card row align-center">
+                    <h3>Buscar Sku</h3>
+                    <input type="text" class="inpt" id="search_inpt">
+                </div>
+            </div>
+            <div class="content flex col" id="stock_holder">
+                <!-- <div class="struct-card row align-center space-between">
+                    <div class="flex gap-1p5">
+                        <div class="info-display">
+                            <span>SKU</span>
+                            <span >I3D-33-Q2-PTO</span>
+                        </div>
+                        <div class="info-display">
+                            <span>Estoque Atual</span>
+                            <span >20 un.</span>
+                        </div>
+                    </div>
+                    <div class="flex ">
+                        <div class="custom-2">
+                            <button>+1</button>
+                            <button>+5</button>
+                            <button>+10</button>
+                            <button>+50</button>
+                            <input type="text" value="1">
+                        </div>
+                        <div class="flex align-center">
+                            <i class="fa-solid fa-arrow-right-long" style="font-size: 2rem; margin: 0 1rem; color: var(--primary);"></i>
+                        </div>
+                        <div class="custom-1">
+                            <button><i class="fa-solid fa-minus"></i>Remover</button>
+                            <button><i class="fa-solid fa-plus"></i>Adicionar</button>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <script>
+    function setUser(){
+        const user = JSON.parse(localStorage.getItem("user"));
+        const user_name = document.querySelector("#user_name");
+
+        user_name.innerHTML = user.firstName;
+        const viewportWidth = window.innerWidth;
+
+        document.querySelector("#user_icon").classList.value = user.role == "admin" ? "fa-solid fa-crown ct-user" : "fa-solid fa-user ct-user";
+        
+        if(viewportWidth < 600){
+            user_name.style.fontSize = "1rem";
+        }
+    }
+    setUser();
+
+    // function updateScreenSize() {
+    //     const viewportWidth = window.innerWidth;
+    //     const ct_1 = document.querySelector("#ct_1");
+
+    //     const isMobile = viewportWidth < 600;
+
+    //     ct_1.classList.toggle("w50", !isMobile);
+    // }
+
+    // updateScreenSize();
+    // window.addEventListener('resize', updateScreenSize);
+
+    
+
+
+
+
+    const hover_elements = 
+    {
+        loading_spinner: document.querySelector("#loading_spinner"),
+        ifc_create_product: document.querySelector("#ifc_create_product")
+    }
+
+    const hover_container = document.querySelector(".hover-container");
+    hover_container.style.display = "none";
+
+    function toggleHoverContainer(el_id){
+        if(hover_container.style.display == "none"){
+            hover_container.style.display = "flex";
+
+            for (const [key, value] of Object.entries(hover_elements)) {
+            
+                if(key == el_id){
+                    value.style.display = "flex";
+                    continue;
+                }
+
+                value.style.display = "none";
+            }
+            
+        }else{
+            hover_container.style.display = "none";
+        }
+    }
+
+    const params = new URLSearchParams(window.location.search);
+
+    const inventory_id = params.get('inventory_id');
+    const type = params.get('type');
+
+    let base_stock;
+    // [{"id":98530981,"ean":"","asin":"","sku":"I3D-01-Q1-BCO","name":null,"parent_id":96942349,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530982,"ean":"","asin":"","sku":"I3D-01-Q1-PTO","name":null,"parent_id":96942349,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530983,"ean":"","asin":"","sku":"I3D-02-Q1-BCO","name":null,"parent_id":96942350,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530984,"ean":"","asin":"","sku":"I3D-02-Q1-PTO","name":null,"parent_id":96942350,"stock":{"bl_63018":15},"prices":{"48665":0}},{"id":98530985,"ean":"","asin":"","sku":"I3D-03-Q8-BCO","name":null,"parent_id":96942351,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530986,"ean":"","asin":"","sku":"I3D-03-Q8-PTO","name":null,"parent_id":96942351,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530987,"ean":"","asin":"","sku":"I3D-04-Q1-BCO","name":null,"parent_id":96942352,"stock":{"bl_63018":18},"prices":{"48665":0}},{"id":98530988,"ean":"","asin":"","sku":"I3D-04-Q1-PTO","name":null,"parent_id":96942352,"stock":{"bl_63018":13},"prices":{"48665":0}},{"id":98530989,"ean":"","asin":"","sku":"I3D-05-Q1-BCO","name":null,"parent_id":96942353,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530990,"ean":"","asin":"","sku":"I3D-05-Q1-PTO","name":null,"parent_id":96942353,"stock":{"bl_63018":17},"prices":{"48665":0}},{"id":98530991,"ean":"","asin":"","sku":"I3D-06-Q3-BCO","name":null,"parent_id":96942354,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530992,"ean":"","asin":"","sku":"I3D-06-Q3-BCO-PTO","name":null,"parent_id":96942354,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530993,"ean":"","asin":"","sku":"I3D-06-Q3-PTO","name":null,"parent_id":96942354,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530994,"ean":"","asin":"","sku":"I3D-06-Q3-PTO-BCO","name":null,"parent_id":96942354,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530995,"ean":"","asin":"","sku":"I3D-07-Q8-BCO","name":null,"parent_id":96942355,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530996,"ean":"","asin":"","sku":"I3D-07-Q8-PTO","name":null,"parent_id":96942355,"stock":{"bl_63018":14},"prices":{"48665":0}},{"id":98530997,"ean":"","asin":"","sku":"I3D-08-Q2-BCO","name":null,"parent_id":96942356,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530998,"ean":"","asin":"","sku":"I3D-08-Q2-PTO","name":null,"parent_id":96942356,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98530999,"ean":"","asin":"","sku":"I3D-09-Q2-BCO","name":null,"parent_id":96942357,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98531000,"ean":"","asin":"","sku":"I3D-09-Q2-PTO","name":null,"parent_id":96942357,"stock":{"bl_63018":19},"prices":{"48665":0}},{"id":98531001,"ean":"","asin":"","sku":"I3D-10-Q5-BCO","name":null,"parent_id":96942358,"stock":{"bl_63018":8},"prices":{"48665":0}},{"id":98531002,"ean":"","asin":"","sku":"I3D-10-Q5-PTO","name":null,"parent_id":96942358,"stock":{"bl_63018":17},"prices":{"48665":0}},{"id":98531003,"ean":"","asin":"","sku":"I3D-11-Q5-BCO","name":null,"parent_id":96942359,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98531004,"ean":"","asin":"","sku":"I3D-11-Q5-PTO","name":null,"parent_id":96942359,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98531005,"ean":"","asin":"","sku":"I3D-12-Q1-BCO","name":null,"parent_id":96942360,"stock":{"bl_63018":14},"prices":{"48665":0}},{"id":98531006,"ean":"","asin":"","sku":"I3D-12-Q1-PTO","name":null,"parent_id":96942360,"stock":{"bl_63018":5},"prices":{"48665":0}},{"id":98531007,"ean":"","asin":"","sku":"I3D-13-Q2-BCO","name":null,"parent_id":96942361,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98531008,"ean":"","asin":"","sku":"I3D-13-Q2-PTO","name":null,"parent_id":96942361,"stock":{"bl_63018":18},"prices":{"48665":0}},{"id":98531009,"ean":"","asin":"","sku":"I3D-17-Q1-BCO","name":null,"parent_id":96232069,"stock":{"bl_63018":40},"prices":{"48665":0}},{"id":98531010,"ean":"","asin":"","sku":"I3D-17-Q1-BCO-PTO","name":null,"parent_id":96232069,"stock":{"bl_63018":41},"prices":{"48665":0}},{"id":98531011,"ean":"","asin":"","sku":"I3D-17-Q1-PTO","name":null,"parent_id":96232069,"stock":{"bl_63018":94},"prices":{"48665":0}},{"id":98531012,"ean":"","asin":"","sku":"I3D-17-Q1-PTO-BCO","name":null,"parent_id":96232069,"stock":{"bl_63018":37},"prices":{"48665":0}},{"id":98531013,"ean":"","asin":"","sku":"I3D-31-Q4-BCO","name":null,"parent_id":97036449,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98531014,"ean":"","asin":"","sku":"I3D-31-Q4-PTO","name":null,"parent_id":97036449,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584845,"ean":"","asin":"","sku":"I3D-14-Q1-BCO","name":null,"parent_id":98584824,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584846,"ean":"","asin":"","sku":"I3D-14-Q1-PTO","name":null,"parent_id":98584824,"stock":{"bl_63018":18},"prices":{"48665":0}},{"id":98584847,"ean":"","asin":"","sku":"I3D-15-Q1-BCO","name":null,"parent_id":98584825,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584848,"ean":"","asin":"","sku":"I3D-15-Q1-PTO","name":null,"parent_id":98584825,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584849,"ean":"","asin":"","sku":"I3D-16-Q1-BCO","name":null,"parent_id":98584826,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584850,"ean":"","asin":"","sku":"I3D-16-Q1-PTO","name":null,"parent_id":98584826,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584851,"ean":"","asin":"","sku":"I3D-18-Q2-BCO","name":null,"parent_id":98584827,"stock":{"bl_63018":19},"prices":{"48665":0}},{"id":98584852,"ean":"","asin":"","sku":"I3D-18-Q2-PTO","name":null,"parent_id":98584827,"stock":{"bl_63018":18},"prices":{"48665":0}},{"id":98584853,"ean":"","asin":"","sku":"I3D-19-Q1-BCO","name":null,"parent_id":98584828,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584854,"ean":"","asin":"","sku":"I3D-19-Q1-PTO","name":null,"parent_id":98584828,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584855,"ean":"","asin":"","sku":"I3D-20-Q2-BCO","name":null,"parent_id":98584829,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584856,"ean":"","asin":"","sku":"I3D-20-Q2-PTO","name":null,"parent_id":98584829,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584857,"ean":"","asin":"","sku":"I3D-21-Q1-BCO","name":null,"parent_id":98584830,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584858,"ean":"","asin":"","sku":"I3D-21-Q1-PTO","name":null,"parent_id":98584830,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584859,"ean":"","asin":"","sku":"I3D-22-Q1-BCO","name":null,"parent_id":98584831,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584860,"ean":"","asin":"","sku":"I3D-22-Q1-PTO","name":null,"parent_id":98584831,"stock":{"bl_63018":19},"prices":{"48665":0}},{"id":98584861,"ean":"","asin":"","sku":"I3D-23-Q1-PTO","name":null,"parent_id":98584832,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584862,"ean":"","asin":"","sku":"I3D-24-Q2-PTO","name":null,"parent_id":98584833,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584863,"ean":"","asin":"","sku":"I3D-25-Q2-BCO","name":null,"parent_id":98584834,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584864,"ean":"","asin":"","sku":"I3D-25-Q2-PTO","name":null,"parent_id":98584834,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584865,"ean":"","asin":"","sku":"I3D-26-Q1-BCO","name":null,"parent_id":98584835,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584866,"ean":"","asin":"","sku":"I3D-26-Q1-PTO","name":null,"parent_id":98584835,"stock":{"bl_63018":18},"prices":{"48665":0}},{"id":98584867,"ean":"","asin":"","sku":"I3D-27-Q1-BCO","name":null,"parent_id":98584836,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584868,"ean":"","asin":"","sku":"I3D-27-Q1-PTO","name":null,"parent_id":98584836,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584869,"ean":"","asin":"","sku":"I3D-28-Q2-BCO","name":null,"parent_id":98584837,"stock":{"bl_63018":18},"prices":{"48665":0}},{"id":98584870,"ean":"","asin":"","sku":"I3D-28-Q2-PTO","name":null,"parent_id":98584837,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584871,"ean":"","asin":"","sku":"I3D-29-Q1-BCO","name":null,"parent_id":98584838,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584872,"ean":"","asin":"","sku":"I3D-29-Q1-PTO","name":null,"parent_id":98584838,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584873,"ean":"","asin":"","sku":"I3D-30-Q1-BCO","name":null,"parent_id":98584839,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584874,"ean":"","asin":"","sku":"I3D-30-Q1-PTO","name":null,"parent_id":98584839,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584875,"ean":"","asin":"","sku":"I3D-32-Q1-BCO","name":null,"parent_id":98584840,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584876,"ean":"","asin":"","sku":"I3D-32-Q1-PTO","name":null,"parent_id":98584840,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584877,"ean":"","asin":"","sku":"I3D-33-Q2-BCO","name":null,"parent_id":98584841,"stock":{"bl_63018":20},"prices":{"48665":0}},{"id":98584878,"ean":"","asin":"","sku":"I3D-33-Q2-PTO","name":null,"parent_id":98584841,"stock":{"bl_63018":20},"prices":{"48665":0}}]
+
+    const search_inpt = document.querySelector("#search_inpt");
+    const stock_holder = document.querySelector("#stock_holder");
+
+
+    search_inpt.addEventListener("input", function () {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        showStock(this.value.replace(/[^0-9]/g, ''));
+    });
+
+    // showStock(17)
+
+    async function main() {
+        await fetchBaseStock();
+    }
+
+    main();
+
+    async function fetchBaseStock() {
+
+        const stock = await fetchInfo(`/api/v1/base-stock/get-all-stock?inventory_id=${inventory_id}&type=${type}`);
+
+        if(stock.error){
+            return pushNotify("error", "Não foi possível obter a informação de estoque da base!")
+        }
+
+        base_stock = stock.data;
+    }
+
+    async function updateStock(product_id, action, el_id) {
+        const el = document.querySelector("#" + el_id + " input");
+
+        const filtered = base_stock.filter(st => st.id == product_id)
+
+        if(el.value < 1) return;
+        
+        let response_1 = await postData(`/api/v1/base-stock/update-stock`, "post", {
+            inventory_id,
+            product_id,
+            action,
+            value: el.value,
+            stock: filtered[0].stock, 
+            sku: filtered[0].sku, 
+        });
+
+        if(response_1.message.includes("Sincronia")){
+            pushNotify("error", response_1.message);
+
+            await fetchBaseStock();
+            await sleep(50)
+            showStock(search_inpt.value)
+            return;
+        }
+
+        if(response_1.error){
+            return pushNotify("error", response_1.message);
+        }
+
+        pushNotify("success", "Atualização concluída");
+        await fetchBaseStock();
+        await sleep(50)
+        showStock(search_inpt.value)
+    }
+    
+    async function showStock(sku) {
+        const filtered = base_stock.filter(st => Number(st.sku.split("-")[1]) === Number(sku))
+
+        let html = "";
+
+
+        for (const [index, element] of filtered.entries()) {
+            html += 
+            `
+                <div class="struct-card row align-center space-between" id="row-${index}">
+                    <div class="flex gap-1p5">
+                        <div class="info-display">
+                            <span>SKU</span>
+                            <span>${element.sku}</span>
+                        </div>
+                        <div class="info-display">
+                            <span>Estoque Atual</span>
+                            <span>${Object.values(element.stock)[0]} un.</span>
+                        </div>
+                    </div>
+                    <div class="flex ">
+                        <div class="custom-2">
+                            <button onclick="add('row-${index}', 1)">+1</button>
+                            <button onclick="add('row-${index}', 5)">+5</button>
+                            <button onclick="add('row-${index}', 10)">+10</button>
+                            <button onclick="add('row-${index}', 50)">+50</button>
+                            <button onclick="clearInpt('row-${index}')">limpar</button>
+                            <input type="text" value="0">
+                        </div>
+                        <div class="flex align-center">
+                            <i class="fa-solid fa-arrow-right-long" style="font-size: 2rem; margin: 0 1rem; color: var(--primary);"></i>
+                        </div>
+                        <div class="custom-1">
+                            <button onclick="updateStock(${element.id}, 'remove', 'row-${index}')"><i class="fa-solid fa-minus"></i>Remover</button>
+                            <button onclick="updateStock(${element.id}, 'add', 'row-${index}')"><i class="fa-solid fa-plus"></i>Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        stock_holder.innerHTML = html;
+    } 
+
+    function onlyNumber(e){
+        e.value = e.value.replace(/[^0-9]/g, '');
+    }
+
+    function add(el_id, qtd){
+        const el = document.querySelector("#" + el_id + " input");
+        el.value = Number(el.value) + Number(qtd);
+    }
+
+    function clearInpt(el_id){
+        const el = document.querySelector("#" + el_id + " input");
+        el.value = 0;
+    }
+
+    function formatTime(time) {
+        const [hours, minutes, seconds] = time.split(':').map(Number);
+
+        const parts = [];
+        if (hours > 0) parts.push(`${hours}h`);
+        if (minutes > 0) parts.push(`${minutes}m`);
+        if (seconds > 0) parts.push(`${seconds}s`);
+
+        return parts.join(' ') || '0s';
+    }
+
+    function corDate(date){
+        if(!date) return "";
+
+        date = new Date(date)
+
+        date.setHours(date.getHours() - 3, date.getMinutes(), date.getSeconds())
+
+        date = date.toISOString();
+
+        var newDate = date.split(".")[0]
+        newDate = newDate.split("T");
+
+        var day = newDate[0].split("-")
+        return `${day[2]}/${day[1]}/${day[0]} ${newDate[1]}`;
+    }
+
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    </script>
+</body>
+</html>

@@ -159,6 +159,11 @@ nav > div
     gap: 1rem;
 }
 
+.gap-1p5
+{
+    gap: 1.5rem;
+}
+
 .col
 {
     flex-direction: column;
