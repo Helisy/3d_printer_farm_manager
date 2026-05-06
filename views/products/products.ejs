@@ -143,6 +143,9 @@
                         <input placeholder="Pesquisar..." id="inpt_search" type="text">
                         <button class="action-btn btn primary" id="btn_search"><i class="fa-solid fa-arrow-right"></i></button>
                     </div>
+                    <select class="select" id="sc_models_brand"></select>
+                    <select class="select" id="sc_brand"></select>
+                    <select class="select" id="sc_material"></select>
                 </div>
             </div>
             <div class="content grid c4" id="products_container">
@@ -257,6 +260,10 @@
     const inpt_file = document.querySelector("#inpt_file");
     const inpt_img = document.querySelector("#inpt_img");
 
+    const sc_models_brand = document.querySelector("#sc_models_brand");
+    const sc_brand = document.querySelector("#sc_brand");
+    const sc_material = document.querySelector("#sc_material");
+
     async function main() {
         toggleHoverContainer("loading_spinner");
 
@@ -285,12 +292,17 @@
         sl_models_brand.innerHTML = printer_brand;
         sl_brand.innerHTML = brand_html;
         sl_material.innerHTML = material_html;
+
+        sc_models_brand.innerHTML = '<option value="">Filtrar Modelo de Impressora</option>' + printer_brand;
+        sc_brand.innerHTML = '<option value="">Filtrar Marca de Filamento</option>' + brand_html;
+        sc_material.innerHTML = '<option value="">Filtrar Material</option>' + material_html;
     }
 
     main();
 
     async function showProducts(query){
-        let products = await fetchInfo(`/api/v1/products${!query ? "" : "?q=" + query}`);
+
+        let products = await fetchInfo(`/api/v1/products${!query ? "" : "?q=" + query}${sc_models_brand.value == "" ? "" : "&filament_brand_id=" + sc_models_brand.value}${sc_brand.value == "" ? "" : "&printer_model_id=" + sc_brand.value}${sc_material.value == "" ? "" : "&filament_material_id=" + sc_material.value}`);
         products = products.data;
 
         let html = "";
@@ -465,6 +477,18 @@
         await showProducts(inpt_search.value)
 
         toggleHoverContainer();
+    });
+
+    sc_models_brand.addEventListener("change", async () => {
+        await showProducts(inpt_search.value)
+    });
+
+    sc_brand.addEventListener("change", async () => {
+        await showProducts(inpt_search.value)
+    });
+
+    sc_material.addEventListener("change", async () => {
+        await showProducts(inpt_search.value)
     });
     
     async function deleteProduct(id) {
