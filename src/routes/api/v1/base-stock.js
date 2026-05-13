@@ -85,9 +85,7 @@ router.post('/update-stock', validateToken, async (req, res) => {
         );
     }
 
-
-
-    const [key, value] = Object.entries(current_stock)[0];
+    const [key, value] = Object.entries(current_stock)[1];
 
     if(value != req.body.stock[key]){
         return res.status(500).json(

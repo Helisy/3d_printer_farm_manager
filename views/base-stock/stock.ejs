@@ -361,6 +361,8 @@
         const filtered = base_stock.filter(st => st.id == product_id)
 
         if(el.value < 1) return;
+
+        console.log(filtered[0])
         
         let response_1 = await postData(`/api/v1/base-stock/update-stock`, "post", {
             inventory_id,
@@ -407,7 +409,7 @@
                         </div>
                         <div class="info-display">
                             <span>Estoque Atual</span>
-                            <span>${Object.values(element.stock)[0]} un.</span>
+                            <span>${Object.values(element.stock)[1]} un.</span>
                         </div>
                     </div>
                     <div class="flex ">
