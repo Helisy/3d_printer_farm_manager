@@ -10,9 +10,12 @@ const db = database();
 //     res.redirect("/printers/list");
 // });
 
-
 router.get('/', validateTokenClient, async (req, res) => {
     res.render("printers/printers_list.ejs");
+});
+
+router.get('/test', validateTokenClient, async (req, res) => {
+    res.render("printers/test.ejs");
 });
 
 router.get('/:id', validateTokenClient, async (req, res) => {
@@ -24,7 +27,7 @@ router.get('/:id', validateTokenClient, async (req, res) => {
         return;
     }
 
-    res.render("printers/printer.ejs");
+    res.render("printers/printer_moonraker.ejs"); 
 });
 
 

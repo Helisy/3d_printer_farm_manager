@@ -1,0 +1,2 @@
+ALTER TABLE jobs
+ADD COLUMN job_file VARCHAR(255) NULL AFTER status_id;

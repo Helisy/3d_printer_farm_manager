@@ -1302,12 +1302,11 @@ router.get('/:id/init', param('id').isInt(), validateToken, async (req, res) => 
     const input = path.join(project_root, "public", "gcodes_files", g_code);
     const output = path.join(project_root, "public", "temp", newCode);
 
-
     await inserZOffset(input, output, z_offset);
 
     await sleep(500);
 
-    const url = `http://${printer_ip}/upload/${newCode}`;
+    const url = `http://${printer_ip}:7125/server/files/upload`;
 
     const form = new FormData();
     form.append('file', fs.createReadStream(output), {
@@ -1329,7 +1328,7 @@ router.get('/:id/init', param('id').isInt(), validateToken, async (req, res) => 
         console.log(`Status: ${response.status}`);
         console.log("Resposta:", response.data);
 
-        if (response.status !== 200) {
+        if (response.status !== 201) {
             throw new Error(`Upload falhou. Código de status: ${response.status}`);
         }
 
@@ -1339,7 +1338,7 @@ router.get('/:id/init', param('id').isInt(), validateToken, async (req, res) => 
         };
 
     } catch (error) {
-        console.log(error.code )
+        console.log(error.code)
         if (error.code === 'ECONNRESET') {
             data = {
                 file: newCode,
@@ -1351,7 +1350,7 @@ router.get('/:id/init', param('id').isInt(), validateToken, async (req, res) => 
     }
 
     try {
-        await db.query(`update jobs set status_id = 2 where id = ?`, [job_id]);
+        await db.query(`update jobs set status_id = 2, job_file = ? where id = ?`, [newCode, job_id]);
         await db.query(`update printers set printer_status_id = 2 where id = ?`, [id]);
     } catch (error) {
         return apiServerError(req, res, error);

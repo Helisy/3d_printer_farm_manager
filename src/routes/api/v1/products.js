@@ -97,7 +97,7 @@ router.get('/', validateToken, async (req, res) => {
 
     filter_query = buildMySqlFilter(req.query, filter);
 
-    filter_query = filter_query == "" ? "where products.deleted_at is null" : filter_query + "and products.deleted_at is null";
+    filter_query = filter_query == "" ? "where products.deleted_at is null" : filter_query + " and products.deleted_at is null";
    
     let data = [];
     try {

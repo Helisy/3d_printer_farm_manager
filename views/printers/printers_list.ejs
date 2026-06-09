@@ -702,10 +702,10 @@
 
 
     async function checkAvailability(ip) {
-        const url = `http://${ip}/static/img/mylogo.dff7f1ec.png`;
+        const url = `http://${ip}:4408/printer/info`;
 
         try {
-            const response = await fetch(url, { method: 'HEAD' });
+            const response = await fetch(url);
 
             if (response.ok) {
                 return true;

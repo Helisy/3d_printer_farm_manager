@@ -301,8 +301,26 @@
     main();
 
     async function showProducts(query){
+        const utl_query = [];
 
-        let products = await fetchInfo(`/api/v1/products${!query ? "" : "?q=" + query}${sc_models_brand.value == "" ? "" : "&filament_brand_id=" + sc_models_brand.value}${sc_brand.value == "" ? "" : "&printer_model_id=" + sc_brand.value}${sc_material.value == "" ? "" : "&filament_material_id=" + sc_material.value}`);
+        if(!!query){
+            utl_query.push("q=" + query);
+        }
+
+        if(sc_models_brand.value != ""){
+            utl_query.push("printer_model_id=" + sc_models_brand.value);
+        }
+
+        if(sc_brand.value != ""){
+            utl_query.push("filament_brand_id=" + sc_brand.value);
+        }
+
+        if(sc_material.value != ""){
+            utl_query.push("filament_material_id=" + sc_material.value);
+        }
+        console.log(`/api/v1/products${utl_query.length < 1 ? "" : "?" + utl_query.join("&")}`)
+
+        let products = await fetchInfo(`/api/v1/products${utl_query.length < 1 ? "" : "?" + utl_query.join("&")}`);
         products = products.data;
 
         let html = "";
