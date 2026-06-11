@@ -213,7 +213,7 @@ router.post('/', validateToken, checkSchema(postProductsValidation), checkRole("
             {
                 id: req.body.printer_brand_id,
                 table: "filament_brands",
-                field: "body 'filament_brand_id'"
+                field: "body 'printer_brand_id'"
             },
             {
                 id: req.body.filament_brand_id,
