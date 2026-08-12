@@ -16,7 +16,11 @@ function inserZOffset(inputPath, outputPath, z_offset) {
             crlfDelay: Infinity
         });
 
+        let inputLines = 0;
+        let outputLines = 0;
+
         rl.on('line', (line) => {
+            inputLines++;
             // Modifica valor de Z nas linhas que começam com G1
             if (/^G1\b/.test(line)) {
                 const zMatch = line.match(/\bZ([-.]?\d*\.?\d+)/);
@@ -46,11 +50,19 @@ function inserZOffset(inputPath, outputPath, z_offset) {
             }
 
             outputStream.write(line + '\n');
+            outputLines++;
         });
 
         rl.on('close', () => {
+            console.log('Lidas:', inputLines);
+            console.log('Escritas:', outputLines);
+
             outputStream.end();
-            resolve(outputFile);
+
+            outputStream.on('finish', () => {
+                console.log('Arquivo terminou de ser gravado');
+                resolve(outputFile);
+            });
         });
 
         rl.on('error', reject);
