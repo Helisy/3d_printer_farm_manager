@@ -18,6 +18,7 @@ function inserZOffset(inputPath, outputPath, z_offset) {
 
         let inputLines = 0;
         let outputLines = 0;
+        let drainPending = false;
 
         rl.on('line', (line) => {
             inputLines++;
@@ -49,8 +50,21 @@ function inserZOffset(inputPath, outputPath, z_offset) {
                 line = `; z_offset = ${z_offset}`;
             }
 
-            outputStream.write(line + '\n');
+            // Controle de backpressure: se o buffer de escrita estiver cheio,
+            // write() retorna false. Nesse caso pausamos a leitura e retomamos
+            // somente quando o stream emitir 'drain'. Sem isso, em arquivos
+            // grandes, dados podem ser bufferizados/perdidos e o arquivo de
+            // saída acaba com menos linhas que o original.
+            const ok = outputStream.write(line + '\n');
             outputLines++;
+            if (!ok && !drainPending) {
+                drainPending = true;
+                rl.pause();
+                outputStream.once('drain', () => {
+                    drainPending = false;
+                    rl.resume();
+                });
+            }
         });
 
         rl.on('close', () => {
