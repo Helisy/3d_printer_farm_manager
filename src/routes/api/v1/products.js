@@ -401,4 +401,52 @@ router.delete('/:id', param('id').isInt(), validateToken, checkRole("admin"), as
     );
 });
 
+
+const putProductsValidation = require("../../../validation/v1/products/v1_put_products"); 
+router.put('/:id', validateToken, checkSchema(putProductsValidation), checkRole("admin"), async (req, res) => {
+    const mysql_table = "products";
+
+    const id = req.params.id;
+
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+        return res.status(400).json({
+            method: req.method,
+            error: true,
+            code: 400,
+            message: "Incorrect entry.",
+            data: result.array()
+        })
+    }
+
+    const validationData = matchedData(req, { locations: ['body'], includeOptionals: true });
+    validateObject(req.body, validationData);
+    
+    if(!!req.body.print_time){
+        req.body.print_time = req.body.print_time + ":00"
+    }
+
+    const sqlUpdate = msySqlUpdateConstructor(mysql_table, id, req.body);
+
+    let data = [];
+    try {
+        await db.execute(sqlUpdate.sql, sqlUpdate.values);
+        let [rows_1] = await db.execute(`select * from ${mysql_table} where id = ${id};`);
+
+        data = rows_1[0];
+    } catch (error) {
+        return apiServerError(req, res, error);
+    }
+
+    res.status(201).json(
+        {
+            method: req.method,
+            error: false,
+            code: 201,
+            message: "Product created successfully",
+            data: data,
+        }
+    );
+});
+
 module.exports = router;

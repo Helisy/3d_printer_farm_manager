@@ -86,6 +86,43 @@
                 <button class="btn primary" onclick="createProduct()">Salvar</button>
             </div>
         </div>
+        <div class="info-card w35" id="ifc_edit_product">
+            <div class="ifc-header">
+                <h3>Editar Produto</h3>
+                <i class="fa-solid fa-xmark" onclick="toggleHoverContainer()"></i>
+            </div>
+            <div class="ifc-body">
+                <div class="inpt">
+                    <span>Itens Inclusos</span>
+                    <input type="text" id="inpt_itens_edit">
+                </div>
+                <div class="inpt">
+                    <span>Tempo de Impressão (HH:MM)</span>
+                    <input type="time" id="inpt_time_edit">
+                </div>
+                <div class="flex">
+                    <div class="inpt">
+                        <span>Peso Bruto</span>
+                        <input type="Number" id="inpt_w_gross_edit">
+                    </div>
+                    <div class="inpt">
+                        <span>Peso Liquido</span>
+                        <input type="Number" id="inpt_w_net_edit">
+                    </div>
+                </div>
+                <div class="flex align-center space-between">
+                    <h3>Gcode</h3>
+                    <input type="file" id="inpt_file_edit">
+                </div>
+                <div class="flex align-center space-between">
+                    <h3>Imagem</h3>
+                    <input type="file" id="inpt_img_edit">
+                </div>
+            </div>
+            <div class="ifc-footer">
+                <button class="btn primary" onclick="editProducts()">Salvar</button>
+            </div>
+        </div>
     </div>
     <div class="main-container">
         <div class="side-nav close" id="side_nav">
@@ -218,7 +255,8 @@
     const hover_elements = 
     {
         loading_spinner: document.querySelector("#loading_spinner"),
-        ifc_create_product: document.querySelector("#ifc_create_product")
+        ifc_create_product: document.querySelector("#ifc_create_product"),
+        ifc_edit_product: document.querySelector("#ifc_create_product")
     }
 
     const hover_container = document.querySelector(".hover-container");
@@ -263,6 +301,13 @@
     const sc_models_brand = document.querySelector("#sc_models_brand");
     const sc_brand = document.querySelector("#sc_brand");
     const sc_material = document.querySelector("#sc_material");
+
+    const inpt_itens_edit = document.querySelector("#inpt_itens_edit");
+    const inpt_time_edit = document.querySelector("#inpt_time_edit");
+    const inpt_w_gross_edit = document.querySelector("#inpt_w_gross_edit");
+    const inpt_w_net_edit = document.querySelector("#inpt_w_net_edit");
+    const inpt_file_edit = document.querySelector("#inpt_file_edit");
+    const inpt_img_edit = document.querySelector("#inpt_img_edit");
 
     async function main() {
         toggleHoverContainer("loading_spinner");
@@ -328,7 +373,7 @@
         for (const product of products) {
             html += 
             `
-                <div class="struct-card col">
+                <div class="struct-card col" data-product_id="${product.id}">
                     <div class="flex space-between">
                         <h2>${product.sku}</h2>
                         <span style="font-size: 1.2rem;">${product.quantity}un</span>
@@ -347,8 +392,14 @@
                         <p class="flex space-between" id="filament_info"><b>Filamento Material:</b>${product.material_name}</p>
                     </div>
                     <span class="lb-title" style="color: var(--primary_darker)">Intens Inclusos</span>
-                    <p>${product.included_items}</p>
-                    <i class="fa-solid fa-trash" style="color: var(--primary_darker); cursor: pointer; font-size: 1.3rem;" onclick="deleteProduct(${product.id})"></i>
+                    <p>${product.included_items == "" ? "-": product.included_items}</p>
+                    <div style="display: flex; gap: .5rem; justify-content: space-between">
+                        <div style="display: flex; gap: .5rem; justify-content: space-between">
+                            <i class="fa-solid fa-trash" style="color: var(--primary_darker); cursor: pointer; font-size: 1.3rem;" onclick="deleteProduct(${product.id})"></i>
+                            <i class="fa-solid fa-pen-to-square" style="color: var(--primary_darker); cursor: pointer; font-size: 1.3rem;" onclick="showEditProductsIFC(${product.id})"></i>
+                        </div>
+                        <span style="color: var(--spacer)">#${product.id}</span>
+                    </div>
                 </div>
             `;
         }
@@ -473,6 +524,8 @@
         inpt_w_gross.value = "";
         inpt_w_net.value = "";
         inpt_quantity.value = "";
+        inpt_file.value = "";
+        inpt_img.value = "";
 
         toggleHoverContainer();
     }
@@ -528,6 +581,116 @@
                 pushNotify("error", "Server Error")
                 return;
         }
+    }
+
+    function showEditProductsIFC(product_id){
+        hover_elements.ifc_edit_product.dataset.product_id = product_id;
+
+        toggleHoverContainer(ifc_edit_product)
+    }
+
+    async function editProducts() {
+        const product_id = hover_elements.ifc_edit_product.dataset.product_id;
+        
+        if(inpt_file_edit.files > 1){
+            return pushNotify("error", "Selecione somente um arquivo!");
+        }
+
+        if(inpt_file_edit.files.length > 0 && !inpt_file_edit.files[0]?.name.includes(".gcode")){
+            return pushNotify("error", "Selecione um gcode.");
+        }
+
+        if(inpt_img_edit.files > 1){
+            return pushNotify("error", "Selecione somente um arquivo!");
+        }
+        
+        const fileName = inpt_img_edit.files[0]?.name.toLowerCase();
+
+        if (inpt_img_edit.files.length > 0 && (!fileName || !fileName.match(/\.(png|jpg|jpeg)$/))) {
+            return pushNotify("error", "Selecione uma imagem.");
+        }
+
+        const edit_body =
+        {
+            "included_items": inpt_itens_edit.value == "" ? undefined : inpt_itens_edit.value,
+            "print_time": inpt_time_edit.value == "" ? undefined : inpt_time_edit.value,
+            "weight_gross": inpt_w_gross_edit.value == "" ? undefined : inpt_w_gross_edit.value,
+            "weight_net": inpt_w_net_edit.value == "" ? undefined : inpt_w_net_edit.value
+        }
+
+        if(
+            inpt_itens_edit.value != "" ||
+            inpt_time_edit.value != "" ||
+            inpt_w_gross_edit.value != "" ||
+            inpt_w_net_edit.value != ""
+        ){
+            let response_1 = await postData(`/api/v1/products/${product_id}`, "put", edit_body);
+
+            switch (response_1.code) {
+                case 400:
+                    pushNotify("error", response_1.message);
+                    return;
+                case 500:
+                    pushNotify("error", "Server Error");
+                    return;
+            }
+        }
+
+        if(inpt_file_edit.files.length > 0){
+            const file = inpt_file_edit.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch(`/api/v1/products/${product_id}/gcode`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    return pushNotify(`Erro ao enviar: ${response.status}`);
+                }
+
+                // const resultado = await response.json();
+            } catch (erro) {
+                return pushNotify("error", "Erro ao enviar o arquivo!");
+            }
+        }
+
+        if(inpt_img_edit.files.length > 0){
+            const img_file = inpt_img_edit.files[0];
+            const formData_2 = new FormData();
+            formData_2.append("file", img_file);  
+
+            try {
+                const response = await fetch(`/api/v1/products/${product_id}/image`, {
+                    method: "POST",
+                    body: formData_2
+                });
+
+                if (!response.ok) {
+                    return pushNotify(`Erro ao enviar: ${response.status}`);
+                }
+
+                // const resultado = await response.json();
+            } catch (erro) {
+                return pushNotify("error", "Erro ao enviar o arquivo!");
+            }
+        }
+
+        inpt_itens_edit.value = "";
+        inpt_time_edit.value = "";
+        inpt_w_gross_edit.value = "";
+        inpt_w_net_edit.value = "";
+        inpt_file_edit.value = "";
+        inpt_img_edit.value = "";
+
+        await main();
+
+        products_container.querySelector(`[data-product_id='${product_id}']`).scrollIntoView()
+
+        toggleHoverContainer()
+        pushNotify("success", "Produto atualizado!");
     }
 
     function formatTime(time) {
